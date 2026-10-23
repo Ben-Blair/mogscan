@@ -1,0 +1,100 @@
+{
+  "M_free": {
+    "pearson": 0.6950031632581448,
+    "mae": 0.35821285241035145,
+    "rmse": 0.4592541053601186
+  },
+  "M": {
+    "pearson": 0.6895949398330793,
+    "mae": 0.35964331680053324,
+    "rmse": 0.46263610238493974,
+    "alpha": 0.35622478902624444,
+    "active_metrics": [
+      "canthal_tilt",
+      "eye_spacing",
+      "fwhr",
+      "midface_ratio",
+      "lower_third",
+      "chin_philtrum",
+      "nose_intercanthal",
+      "mouth_nose",
+      "jaw_cheek",
+      "lip_ratio",
+      "eye_aspect",
+      "brow_eye",
+      "face_lw"
+    ],
+    "metric_corr": {
+      "canthal_tilt": -0.01380940071351975,
+      "eye_spacing": 0.1386631730037673,
+      "fwhr": -0.2409030130319586,
+      "midface_ratio": 0.1940787792827091,
+      "lower_third": -0.08056558748558094,
+      "chin_philtrum": 0.17953919493774764,
+      "nose_intercanthal": 0.03779987412464166,
+      "mouth_nose": 0.14110140705389185,
+      "jaw_cheek": -0.3169377947324328,
+      "lip_ratio": 0.010539297022696093,
+      "eye_aspect": 0.3673283495540447,
+      "brow_eye": -0.22167378398459398,
+      "face_lw": 0.41486337551944447,
+      "symmetry": 0.18553829996580368,
+      "jaw_angle": 0.33718310511118754
+    }
+  },
+  "F_free": {
+    "pearson": 0.6928560206800836,
+    "mae": 0.4071924524216727,
+    "rmse": 0.5118374771654336
+  },
+  "F": {
+    "pearson": 0.6512486604617951,
+    "mae": 0.4251671788388242,
+    "rmse": 0.5383281991530957,
+    "alpha": 62.10169418915616,
+    "active_metrics": [
+      "canthal_tilt",
+      "eye_spacing",
+      "fwhr",
+      "midface_ratio",
+      "lower_third",
+      "chin_philtrum",
+      "nose_intercanthal",
+      "mouth_nose",
+      "jaw_cheek",
+      "lip_ratio",
+      "eye_aspect",
+      "brow_eye",
+      "face_lw",
+      "symmetry",
+      "jaw_angle"
+    ],
+    "metric_corr": {
+      "canthal_tilt": 0.01606253802914715,
+      "eye_spacing": 0.24094796706002417,
+      "fwhr": -0.272100993336041,
+      "midface_ratio": -0.03059243535828564,
+      "lower_third": -0.18266613131458634,
+      "chin_philtrum": 0.2010122825724662,
+      "nose_intercanthal": -0.10198113946285566,
+      "mouth_nose": 0.10593966641464482,
+      "jaw_cheek": -0.4340293424298584,
+      "lip_ratio": -0.11608134622990667,
+      "eye_aspect": 0.3642397981517754,
+      "brow_eye": 0.047190986993223924,
+      "face_lw": 0.44499244849314273,
+      "symmetry": 0.1098750574445775,
+      "jaw_angle": 0.38092815053020845
+    }
+  },
+  "all": {
+    "pearson": 0.6743066196356291,
+    "mae": 0.39172022562564207,
+    "rmse": 0.5011213596257206
+  },
+  "all_free": {
+    "pearson": 0.6986956390801959,
+    "mae": 0.3821905929613482,
+    "rmse": 0.48570785960908114
+  }
+}

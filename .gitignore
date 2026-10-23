@@ -1,0 +1,32 @@
+# Python / training
+training/.venv/
+training/data/
+# Per-image outputs contain SCUT-FBP5500 labels (research-only license); keep only summaries
+training/out/*
+!training/out/results*.json
+__pycache__/
+# Node / app
+app/node_modules/
+app/dist/
+app/public/mediapipe/
+app/.env.local
+# LaTeX build output
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.nav
+*.snm
+*.toc
+*.vrb
+# Video build output
+video/build/
+video/clips/
+video/*.mp4
+# Study data with participant responses (keep out of public repos)
+study/responses.csv
+study/logs/
+.DS_Store
