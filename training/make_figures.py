@@ -1,7 +1,8 @@
 """Figures and tables for the write-up (no face images, only numbers).
 
   writeup/figures/scatter.pdf        fused prediction vs. human rating on the test split
-  writeup/figures/metric_corr.pdf    which looksmax metrics actually track human ratings
+  writeup/figures/metric_corr.pdf    which looksmax features actually track human ratings (top 25)
+  writeup/figures/ablation.pdf       what each data source adds to the explainable model
   writeup/generated/*.tex            LaTeX macros/tables filled from results JSON
 """
 import json
@@ -14,7 +15,6 @@ import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-from mogscan_metrics import METRIC_NAMES  # noqa: E402
 
 ROOT = Path(__file__).parent
 OUT = ROOT / "out"
@@ -24,7 +24,29 @@ LABELS = {"canthal_tilt": "Canthal tilt", "eye_spacing": "Eye spacing (ESR)", "f
           "midface_ratio": "Midface ratio", "lower_third": "Lower third", "chin_philtrum": "Chin : philtrum",
           "nose_intercanthal": "Nose : intercanthal", "mouth_nose": "Mouth : nose", "jaw_cheek": "Jaw : cheekbone",
           "lip_ratio": "Lower : upper lip", "eye_aspect": "Eye openness", "brow_eye": "Brow-eye distance",
-          "face_lw": "Face length : width", "symmetry": "Asymmetry", "jaw_angle": "Jaw angle"}
+          "face_lw": "Face length : width", "symmetry": "Asymmetry", "jaw_angle": "Gonial angle",
+          "averageness": "Averageness", "dimorphism": "Shape dimorphism", "skin_texture": "Skin texture",
+          "skin_lum": "Skin brightness", "lip_contrast": "Lip contrast", "eye_contrast": "Eye contrast",
+          "sclera_bright": "Sclera brightness", "jaw_frame": "Jaw width : face length", "chin_angle": "Chin taper",
+          "orbital_vector": "Orbital vector", "midface_projection": "Midface projection",
+          "facial_convexity": "Facial convexity", "cheekbone_height": "Cheekbone height",
+          "lower_face_fullness": "Lower-face fullness", "jaw_definition": "Jaw definition",
+          "brow_thickness": "Brow thickness", "nose_face": "Nose : face width", "iris_fill": "Iris : eye width",
+          "eye_width": "Eye width : face width", "upper_scleral": "Upper scleral show", "temple_cheek": "Temple : cheekbone",
+          "upper_third": "Upper third", "orbital_depth": "Brow ridge depth", "intercanthal_eye": "Intercanthal : eye",
+          "brow_length": "Brow length", "lash_line": "Lash-line brightness", "ramus": "Ramus length"}
+GROUP_LABELS = {"eyes": "Eyes", "brows": "Brows", "nose": "Nose", "mouth": "Mouth & lips", "jaw": "Jaw & chin",
+                "proportions": "Proportions", "depth": "Profile depth (3D)", "symmetry": "Symmetry",
+                "shape": "Whole-face shape", "skin": "Skin", "colouring": "Colouring & contrast",
+                "hair": "Hair & grooming", "leanness": "Leanness", "expression": "Expression"}
+
+
+def label(m):
+    if m in LABELS:
+        return LABELS[m]
+    if m.startswith("bs_"):
+        return "expr: " + m[3:]
+    return m.replace("_", " ")
 plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False})
 
 
@@ -43,17 +65,35 @@ def main():
     fig.tight_layout(); fig.savefig(FIG / "scatter.pdf"); fig.savefig(FIG / "scatter.png", dpi=200)
 
     geo = json.load(open(OUT / "results_geometric.json"))
-    corr = pd.DataFrame({s: geo[s]["metric_corr"] for s in ("M", "F")}).loc[METRIC_NAMES]
+    groups = json.load(open(OUT / "feature_groups.json"))
+    all_corr = pd.DataFrame({s: geo[s]["metric_corr"] for s in ("M", "F")})
+    top = all_corr.mean(axis=1).abs().sort_values(ascending=False).index[:25]
+    corr = all_corr.loc[top]
     corr = corr.reindex(corr.mean(axis=1).sort_values().index)
-    fig, ax = plt.subplots(figsize=(3.3, 3.4))
+    fig, ax = plt.subplots(figsize=(3.3, 4.6))
     y = np.arange(len(corr))
     ax.barh(y - 0.2, corr.M, height=0.4, label="male faces", color="#4a6cf7")
     ax.barh(y + 0.2, corr.F, height=0.4, label="female faces", color="#e4572e")
-    ax.set_yticks(y, [LABELS[m] for m in corr.index]); ax.axvline(0, color="black", lw=0.6)
+    ax.set_yticks(y, [label(m) for m in corr.index]); ax.axvline(0, color="black", lw=0.6)
     ax.set_xlabel("Pearson r with human rating (train split)")
-    ax.legend(frameon=False, fontsize=7, loc="center right", bbox_to_anchor=(1.0, 0.36))
+    ax.legend(frameon=False, fontsize=7, loc="lower center", bbox_to_anchor=(0.3, 1.0), ncol=2)
     fig.tight_layout()
     fig.savefig(FIG / "metric_corr.pdf", bbox_inches="tight"); fig.savefig(FIG / "metric_corr.png", dpi=200, bbox_inches="tight")
+
+    ab = geo["ablation"]
+    full = geo["all"]["pearson"]
+    order = sorted(groups, key=lambda g: ab["only"][g])
+    fig, ax = plt.subplots(figsize=(3.3, 3.4))
+    y = np.arange(len(order))
+    ax.barh(y, [ab["only"][g] for g in order], color="#4a6cf7", label="this group alone")
+    ax.scatter([10 * (full - ab["without"][g]) for g in order], y, color="#e4572e", s=10, zorder=3,
+               label="drop when removed (x10)")
+    ax.set_yticks(y, [f"{GROUP_LABELS[g]} ({len(groups[g])})" for g in order])
+    ax.set_xlabel("Test Pearson r of the explainable model")
+    ax.axvline(full, color="black", lw=0.6, ls="--")
+    ax.legend(frameon=False, fontsize=6.5, loc="lower center", bbox_to_anchor=(0.4, 1.0), ncol=2)
+    fig.tight_layout()
+    fig.savefig(FIG / "ablation.pdf", bbox_inches="tight"); fig.savefig(FIG / "ablation.png", dpi=200, bbox_inches="tight")
 
     # LaTeX macros so the write-up never contains hand-typed numbers.
     cnn = json.load(open(OUT / "results_cnn.json"))
@@ -69,12 +109,22 @@ def main():
         "wCnn": f"{res['fusion']['wCnn']:.2f}", "wGeo": f"{res['fusion']['wGeo']:.2f}",
         "scoreMean": f"{res['fusion']['scoreMean']:.2f}", "scoreStd": f"{res['fusion']['scoreStd']:.2f}",
         "bestValR": f"{cnn['best_val_pearson']:.3f}",
-        "topMetric": LABELS[corr.mean(axis=1).abs().idxmax()],
+        "topMetric": label(corr.mean(axis=1).abs().idxmax()),
         "topMetricR": f"{corr.mean(axis=1).loc[corr.mean(axis=1).abs().idxmax()]:.2f}",
+        "nFeatures": geo["n_features"], "nGroups": len(groups),
+        "nGeometry": sum(len(groups[g]) for g in ("eyes", "brows", "nose", "mouth", "jaw", "proportions", "depth", "symmetry")),
+        "nShape": len(groups["shape"]), "nPixel": sum(len(groups[g]) for g in ("skin", "colouring", "hair", "leanness")),
+        "nExpression": len(groups["expression"]),
+        "origFifteenR": f"{ab['original_15']:.3f}", "freeR": f"{geo['all_free']['pearson']:.3f}",
+        "cantTiltR": f"{all_corr.loc['canthal_tilt'].mean():.2f}",
     }
     with open(GEN / "numbers.tex", "w") as f:
         for k, v in m.items():
             f.write(f"\\newcommand{{\\{k}}}{{{v}}}\n")
+    with open(GEN / "ablation_table.tex", "w") as f:
+        for g in sorted(groups, key=lambda g: -ab["only"][g]):
+            name = GROUP_LABELS[g].replace("&", "\\&")
+            f.write(f"{name} & {len(groups[g])} & {ab['only'][g]:.3f} & {ab['without'][g] - full:+.3f} \\\\\n")
     with open(GEN / "bias_table.tex", "w") as f:
         for b in bias:
             f.write(f"{b['group']} & {b['n']} & {b['pearson']:.3f} & {b['mae']:.3f} & {b['signed_bias']:+.3f} \\\\\n")
@@ -95,7 +145,7 @@ def write_study_macros():
         paying = sum(v for k, v in pay.items() if not str(k).lower().startswith("nothing"))
         vals = {"studyN": s["n"], "susMean": f"{s['sus']['mean']:.1f}", "susSD": f"{s['sus']['sd']:.1f}",
                 "npsScore": f"{s['nps']['score']:+.0f}", "payPct": f"{paying / max(1, s['n']) * 100:.0f}"}
-        for k in ("ACC", "STABLE", "EXPLAIN", "FEATURES", "GROUP", "PRIVACY", "BETTER", "FEELBAD"):
+        for k in ("ACC", "STABLE", "EXPLAIN", "FEATURES", "PILLARS", "PRIVACY", "BETTER", "FEELBAD"):
             if k in lk:
                 vals[f"agree{k.title()}"] = f"{lk[k]['agree_pct']:.0f}"
                 vals[f"mean{k.title()}"] = f"{lk[k]['mean']:.2f}"

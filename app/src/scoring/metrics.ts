@@ -4,28 +4,51 @@
 export type Vec3 = [number, number, number]
 export type Vec2 = [number, number]
 
-export const METRIC_NAMES = [
-  'canthal_tilt', 'eye_spacing', 'fwhr', 'midface_ratio', 'lower_third',
-  'chin_philtrum', 'nose_intercanthal', 'mouth_nose', 'jaw_cheek', 'lip_ratio',
-  'eye_aspect', 'brow_eye', 'face_lw', 'symmetry', 'jaw_angle',
-] as const
-export type MetricName = (typeof METRIC_NAMES)[number]
-export type Metrics = Record<MetricName, number>
-
 // MediaPipe canonical face-mesh indices. "r" = subject's right (image left).
 export const IDX = {
   r_eye_outer: 33, r_eye_inner: 133, r_lid_up: 159, r_lid_low: 145,
   l_eye_inner: 362, l_eye_outer: 263, l_lid_up: 386, l_lid_low: 374,
   r_iris: 468, l_iris: 473,
-  r_brow: 105, l_brow: 334, glabella: 9,
-  forehead: 10, subnasale: 2, nose_r: 129, nose_l: 358,
+  r_brow: 105, l_brow: 334, r_brow_low: 52, l_brow_low: 282, r_brow_in: 107, l_brow_in: 336,
+  r_brow_tail: 70, l_brow_tail: 300, glabella: 9, nasion: 168,
+  forehead: 10, subnasale: 2, nose_tip: 1, nose_r: 129, nose_l: 358, bridge_r: 193, bridge_l: 417,
   mouth_r: 61, mouth_l: 291, lip_up_top: 0, lip_up_bot: 13, lip_low_top: 14, lip_low_bot: 17,
-  menton: 152, zyg_r: 234, zyg_l: 454, gon_r: 172, gon_l: 397,
+  bow_r: 37, bow_l: 267, pogonion: 175, chin_r: 176, chin_l: 400,
+  menton: 152, zyg_r: 234, zyg_l: 454, gon_r: 172, gon_l: 397, malar_r: 116, malar_l: 345,
+  temple_r: 54, temple_l: 284, tip_r: 45, tip_l: 275, cheek_low_r: 58, cheek_low_l: 288,
 } as const
 
+const R_IRIS_RING = [469, 470, 471, 472], L_IRIS_RING = [474, 475, 476, 477]
 const MIDLINE = [10, 151, 9, 8, 168, 6, 197, 195, 5, 4, 1, 2, 0, 13, 14, 17, 152]
+const SYM_REGIONS: Record<string, [number, number][]> = {
+  eyes: [[33, 263], [133, 362], [159, 386], [145, 374]],
+  brows: [[105, 334], [70, 300], [107, 336], [52, 282]],
+  nose: [[129, 358], [193, 417], [64, 294]],
+  mouth: [[61, 291], [37, 267], [84, 314]],
+  jaw: [[234, 454], [172, 397], [58, 288], [132, 361], [93, 323], [176, 400]],
+}
 const SYM_PAIRS: [number, number][] = [[33, 263], [133, 362], [159, 386], [145, 374], [61, 291], [234, 454],
   [172, 397], [129, 358], [105, 334], [70, 300], [58, 288], [132, 361], [93, 323]]
+
+/** Every geometric measurement, grouped (same order as training/mogscan_metrics.py). */
+export const METRIC_GROUPS = {
+  eyes: ['canthal_tilt', 'canthal_asym', 'eye_spacing', 'intercanthal_eye', 'eye_width', 'eye_aspect',
+    'iris_fill', 'scleral_show', 'upper_scleral'],
+  brows: ['brow_eye', 'brow_tilt', 'brow_thickness', 'brow_length', 'brow_gap'],
+  nose: ['nose_intercanthal', 'nose_face', 'nose_length', 'nose_bridge', 'nose_tip_width'],
+  mouth: ['mouth_nose', 'mouth_ipd', 'lip_ratio', 'lip_fullness', 'cupid_bow', 'mouth_tilt', 'philtrum_lower'],
+  jaw: ['chin_philtrum', 'chin_height', 'chin_width', 'jaw_cheek', 'jaw_angle', 'jaw_frame', 'chin_angle', 'ramus'],
+  proportions: ['fwhr', 'midface_ratio', 'lower_third', 'upper_third', 'face_lw', 'temple_cheek',
+    'cheekbone_height', 'lower_face_fullness'],
+  depth: ['nasal_projection', 'chin_projection', 'lip_projection', 'malar_projection', 'orbital_depth',
+    'forehead_slope', 'facial_convexity', 'face_depth', 'orbital_vector', 'midface_projection'],
+  symmetry: ['symmetry', 'sym_eyes', 'sym_brows', 'sym_nose', 'sym_mouth', 'sym_jaw'],
+} as const
+export const METRIC_NAMES = Object.values(METRIC_GROUPS).flat()
+export type MetricName = (typeof METRIC_GROUPS)[keyof typeof METRIC_GROUPS][number]
+/** Any model input (metric, shape, appearance or expression feature) by name. */
+export type Features = Record<string, number>
+export type Metrics = Features
 
 /** MediaPipe normalised (x, y, z) -> pixel-space 3D (z shares the x scale). */
 export function to3d(lm: { x: number; y: number; z: number }[], w: number, h: number): Vec3[] {
@@ -136,22 +159,35 @@ function rollNormalise(pts: Vec2[]): Vec2[] {
 
 const deg = (rad: number) => (rad * 180) / Math.PI
 
-export function computeMetrics(pts2: Vec2[]): Metrics {
-  const p = rollNormalise(pts2)
-  const P = Object.fromEntries(Object.entries(IDX).map(([k, v]) => [k, p[v]])) as Record<keyof typeof IDX, Vec2>
+function sym(p: Vec2[], pairs: [number, number][], midX: number, ipd: number): number {
+  let t = 0
+  for (const [a, b] of pairs) t += dist(p[a], [2 * midX - p[b][0], p[b][1]])
+  return t / (pairs.length * ipd)
+}
+
+/** pts: frontalized landmarks (x, y, z). Depth metrics use z. */
+export function computeMetrics(pts: Vec3[] | Vec2[]): Metrics {
+  const p = rollNormalise(pts.map((v) => [v[0], v[1]] as Vec2))
+  const zs = pts.map((v) => (v.length > 2 ? (v as Vec3)[2] : 0))
+  type K = keyof typeof IDX
+  const P = Object.fromEntries(Object.entries(IDX).map(([k, v]) => [k, p[v]])) as Record<K, Vec2>
+  const Z = Object.fromEntries(Object.entries(IDX).map(([k, v]) => [k, zs[v]])) as Record<K, number>
   const ipd = dist(P.r_iris, P.l_iris)
   const bizyg = dist(P.zyg_r, P.zyg_l)
-
-  const tiltR = deg(Math.atan2(P.r_eye_inner[1] - P.r_eye_outer[1], Math.abs(P.r_eye_outer[0] - P.r_eye_inner[0])))
-  const tiltL = deg(Math.atan2(P.l_eye_inner[1] - P.l_eye_outer[1], Math.abs(P.l_eye_outer[0] - P.l_eye_inner[0])))
+  const bigon = dist(P.gon_r, P.gon_l)
+  const tiltOf = (inner: Vec2, outer: Vec2) => deg(Math.atan2(inner[1] - outer[1], Math.abs(outer[0] - inner[0])))
+  const tiltR = tiltOf(P.r_eye_inner, P.r_eye_outer), tiltL = tiltOf(P.l_eye_inner, P.l_eye_outer)
+  const browTiltR = tiltOf(P.r_brow_in, P.r_brow_tail), browTiltL = tiltOf(P.l_brow_in, P.l_brow_tail)
 
   const noseW = dist(P.nose_r, P.nose_l)
   const intercanthal = dist(P.r_eye_inner, P.l_eye_inner)
+  const eyeW = (dist(P.r_eye_outer, P.r_eye_inner) + dist(P.l_eye_outer, P.l_eye_inner)) / 2
   const mouthW = dist(P.mouth_r, P.mouth_l)
   const philtrum = Math.abs(P.lip_up_top[1] - P.subnasale[1])
   const chin = Math.abs(P.menton[1] - P.lip_low_bot[1])
   const midThird = Math.abs(P.subnasale[1] - P.glabella[1])
   const lowThird = Math.abs(P.menton[1] - P.subnasale[1])
+  const faceLen = dist(P.forehead, P.menton)
   const upperFaceH = Math.abs(P.lip_up_top[1] - P.glabella[1])
   const pupilY = (P.r_iris[1] + P.l_iris[1]) / 2
   const upLip = Math.abs(P.lip_up_bot[1] - P.lip_up_top[1])
@@ -160,32 +196,107 @@ export function computeMetrics(pts2: Vec2[]): Metrics {
   const earL = dist(P.l_lid_up, P.l_lid_low) / dist(P.l_eye_outer, P.l_eye_inner)
   const browEye = ((P.r_lid_up[1] - P.r_brow[1]) + (P.l_lid_up[1] - P.l_brow[1])) / 2
 
+  const irisD: number[] = [], showLow: number[] = [], showUp: number[] = []
+  for (const [c, ring, lidUp, lidLow] of [[P.r_iris, R_IRIS_RING, P.r_lid_up, P.r_lid_low],
+    [P.l_iris, L_IRIS_RING, P.l_lid_up, P.l_lid_low]] as [Vec2, number[], Vec2, Vec2][]) {
+    let r = 0
+    for (const i of ring) r += dist(c, p[i])
+    const d = (2 * r) / ring.length
+    irisD.push(d)
+    showLow.push((lidLow[1] - (c[1] + d / 2)) / d)
+    showUp.push(((c[1] - d / 2) - lidUp[1]) / d)
+  }
+  const mean = (a: number[]) => a.reduce((x, y) => x + y, 0) / a.length
+
   let midX = 0
   for (const i of MIDLINE) midX += p[i][0]
   midX /= MIDLINE.length
-  let sym = 0
-  for (const [a, b] of SYM_PAIRS) sym += dist(p[a], [2 * midX - p[b][0], p[b][1]])
-  sym /= SYM_PAIRS.length * ipd
-
   const jawAngle = (angle(P.zyg_r, P.gon_r, P.menton) + angle(P.zyg_l, P.gon_l, P.menton)) / 2
 
-  return {
+  // Pseudo-profile in the sagittal (y, z) plane. MediaPipe z decreases toward the camera.
+  const yz = (k: K): Vec2 => [P[k][1], Z[k]]
+  const t = (P.lip_low_bot[1] - P.nose_tip[1]) / (P.pogonion[1] - P.nose_tip[1] + 1e-9)
+  const eLineZ = Z.nose_tip + t * (Z.pogonion - Z.nose_tip)
+
+  const out: Metrics = {
     canthal_tilt: (tiltR + tiltL) / 2,
+    canthal_asym: Math.abs(tiltR - tiltL),
     eye_spacing: ipd / bizyg,
+    intercanthal_eye: intercanthal / eyeW,
+    eye_width: eyeW / bizyg,
+    eye_aspect: (earR + earL) / 2,
+    iris_fill: mean(irisD) / eyeW,
+    scleral_show: mean(showLow),
+    upper_scleral: mean(showUp),
+    brow_eye: browEye / ipd,
+    brow_tilt: (browTiltR + browTiltL) / 2,
+    brow_thickness: ((P.r_brow_low[1] - P.r_brow[1]) + (P.l_brow_low[1] - P.l_brow[1])) / (2 * ipd),
+    brow_length: (dist(P.r_brow_in, P.r_brow_tail) + dist(P.l_brow_in, P.l_brow_tail)) / (2 * eyeW),
+    brow_gap: dist(P.r_brow_in, P.l_brow_in) / intercanthal,
+    nose_intercanthal: noseW / intercanthal,
+    nose_face: noseW / bizyg,
+    nose_length: Math.abs(P.subnasale[1] - P.nasion[1]) / Math.abs(P.menton[1] - P.nasion[1]),
+    nose_bridge: dist(P.bridge_r, P.bridge_l) / noseW,
+    nose_tip_width: dist(P.tip_r, P.tip_l) / noseW,
+    mouth_nose: mouthW / noseW,
+    mouth_ipd: mouthW / ipd,
+    lip_ratio: lowLip / Math.max(upLip, 1e-6),
+    lip_fullness: (upLip + lowLip) / lowThird,
+    cupid_bow: (P.lip_up_top[1] - (P.bow_r[1] + P.bow_l[1]) / 2) / Math.max(upLip, 1e-6),
+    mouth_tilt: ((P.lip_up_bot[1] + P.lip_low_top[1]) / 2 - (P.mouth_r[1] + P.mouth_l[1]) / 2) / mouthW,
+    philtrum_lower: philtrum / lowThird,
+    chin_philtrum: chin / philtrum,
+    chin_height: chin / lowThird,
+    chin_width: dist(P.chin_r, P.chin_l) / bigon,
+    jaw_cheek: bigon / bizyg,
+    jaw_angle: jawAngle,
+    jaw_frame: bigon / faceLen,
+    chin_angle: angle(P.gon_r, P.menton, P.gon_l),
+    ramus: (dist(P.zyg_r, P.gon_r) + dist(P.zyg_l, P.gon_l)) / (2 * faceLen),
     fwhr: bizyg / upperFaceH,
     midface_ratio: Math.abs(P.lip_up_top[1] - pupilY) / ipd,
     lower_third: lowThird / (midThird + lowThird),
-    chin_philtrum: chin / philtrum,
-    nose_intercanthal: noseW / intercanthal,
-    mouth_nose: mouthW / noseW,
-    jaw_cheek: dist(P.gon_r, P.gon_l) / bizyg,
-    lip_ratio: lowLip / Math.max(upLip, 1e-6),
-    eye_aspect: (earR + earL) / 2,
-    brow_eye: browEye / ipd,
-    face_lw: dist(P.forehead, P.menton) / bizyg,
-    symmetry: sym,
-    jaw_angle: jawAngle,
+    upper_third: Math.abs(P.glabella[1] - P.forehead[1]) / Math.abs(P.menton[1] - P.forehead[1]),
+    face_lw: faceLen / bizyg,
+    temple_cheek: dist(P.temple_r, P.temple_l) / bizyg,
+    cheekbone_height: (P.subnasale[1] - (P.malar_r[1] + P.malar_l[1]) / 2) / (P.subnasale[1] - pupilY),
+    lower_face_fullness: dist(P.cheek_low_r, P.cheek_low_l) / bizyg,
+    nasal_projection: ((Z.nose_r + Z.nose_l) / 2 - Z.nose_tip) / ipd,
+    chin_projection: (Z.lip_low_bot - Z.pogonion) / ipd,
+    lip_projection: (eLineZ - Z.lip_low_bot) / ipd,
+    malar_projection: ((Z.zyg_r + Z.zyg_l) / 2 - (Z.malar_r + Z.malar_l) / 2) / ipd,
+    orbital_depth: ((Z.r_iris + Z.l_iris) / 2 - (Z.r_brow + Z.l_brow) / 2) / ipd,
+    forehead_slope: (Z.forehead - Z.glabella) / ipd,
+    facial_convexity: angle(yz('glabella'), yz('subnasale'), yz('pogonion')),
+    face_depth: ((Z.zyg_r + Z.zyg_l) / 2 - Z.nose_tip) / bizyg,
+    orbital_vector: ((Z.r_iris + Z.l_iris) / 2 - (Z.malar_r + Z.malar_l) / 2) / ipd,
+    midface_projection: (Z.glabella - Z.subnasale) / ipd,
+    symmetry: sym(p, SYM_PAIRS, midX, ipd),
   }
+  for (const [k, v] of Object.entries(SYM_REGIONS)) out[`sym_${k}`] = sym(p, v, midX, ipd)
+  return out
+}
+
+export interface ShapeModel { axis: number[]; mean: number[]; pcs: number[][]; pcStd: number[] }
+
+/** Whole-face shape features from the frontalized normalised 3D shape (see compute_shape). */
+export function computeShape(f: Vec3[], template: Vec3[], shape: ShapeModel): Features {
+  const r = new Float64Array(f.length * 3)
+  let ss = 0
+  for (let i = 0; i < f.length; i++) for (let c = 0; c < 3; c++) {
+    const v = f[i][c] - template[i][c]
+    r[i * 3 + c] = v
+    ss += v * v
+  }
+  let dim = 0
+  for (let j = 0; j < r.length; j++) dim += r[j] * shape.axis[j]
+  const out: Features = { averageness: Math.sqrt(ss / f.length), dimorphism: dim }
+  shape.pcs.forEach((pc, k) => {
+    let s = 0
+    for (let j = 0; j < r.length; j++) s += pc[j] * (r[j] - shape.mean[j])
+    out[`shape_pc${k + 1}`] = s / shape.pcStd[k]
+  })
+  return out
 }
 
 const poseFromRotation = (R: number[][]) => ({
@@ -197,16 +308,14 @@ const poseFromRotation = (R: number[][]) => ({
  * head pose (relative to the frontal template) that the frontalization removed. Apparent pose is
  * used for gating because MediaPipe's transformation matrix also includes the off-axis angle of
  * faces near the edge of the frame. */
-export function analyzeFace(lm: { x: number; y: number; z: number }[], w: number, h: number, template: Vec3[]) {
+export function analyzeFace(lm: { x: number; y: number; z: number }[], w: number, h: number, template: Vec3[],
+  shape?: ShapeModel) {
   const q = normaliseShape(to3d(lm, w, h))
   const R = bestRotation(q, template)
   const f = rotate(q, R)
-  return { metrics: computeMetrics(f.map((v) => [v[0], v[1]])), pose: poseFromRotation(R) }
-}
-
-export function metricsFromLandmarks(lm: { x: number; y: number; z: number }[], w: number, h: number,
-  template: Vec3[]): Metrics {
-  return analyzeFace(lm, w, h, template).metrics
+  const metrics = computeMetrics(f)
+  if (shape) Object.assign(metrics, computeShape(f, template, shape))
+  return { metrics, pose: poseFromRotation(R) }
 }
 
 /** Square crop around the landmark bbox (pixel coords). Same rule as training. */

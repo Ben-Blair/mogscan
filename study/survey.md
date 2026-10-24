@@ -8,7 +8,7 @@ can change.
 - **[PID]** Participant code (given by the researcher, e.g. P03). *Short answer*
 - **[CONSENT]** I am 18+ and agreed to take part. *Checkbox*
 - **[AGE]** Age range. *Multiple choice: 18–20, 21–23, 24–26, 27+*
-- **[PRIOR]** Have you used a face-rating / looksmaxxing app before (e.g. UMAX, LooksMax AI, Omoggle)? *Multiple choice: Yes, No*
+- **[PRIOR]** Have you used a face-rating / looksmaxxing app before (e.g. UMAX, LooksMax AI)? *Multiple choice: Yes, No*
 - **[PRIORWHICH]** If yes, which ones? *Short answer, optional*
 
 ## Section 2: System Usability Scale
@@ -30,14 +30,13 @@ can change.
 - **[STABLE]** The score stayed consistent while I held still.
 - **[EXPLAIN]** I understood why I got the score I got.
 - **[FEATURES]** The list of strong/weak features (canthal tilt, philtrum, etc.) was useful.
-- **[GROUP]** Being scanned together with other people was fun.
+- **[PILLARS]** The sub-scores (Harmony, Dimorphism, Angularity, Softmax) were useful.
 - **[PRIVACY]** Knowing it runs on-device (nothing uploaded) made me more comfortable.
 - **[BETTER]** *(only if PRIOR = Yes)* MogScan was better than other face-rating apps I've used.
 - **[FEELBAD]** Using MogScan made me feel worse about my appearance.
 - **[NPS]** How likely are you to recommend MogScan to a friend? *Linear scale 0–10*
 - **[PAY]** What would you pay for a version with progress tracking and a glow-up plan? *Multiple choice:
   Nothing, $1–3 one-time, $3–5/month, $5–10/month, More than $10/month*
-- **[TONE]** Which wording did you prefer? *Multiple choice: Kind, Brutal, No preference*
 
 ## Section 4: Open-ended
 - **[LIKE]** What did you like most? *Paragraph*

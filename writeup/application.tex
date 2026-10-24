@@ -34,14 +34,16 @@
 \begin{abstract}
 Face-rating (``looksmaxxing'') apps are some of the most downloaded AI consumer products of the last two
 years. Omoggle, a webcam ``mog battle'' site, recently spread across Twitch. Current products, however,
-rate one face at a time, give a number without a credible explanation, usually upload the user's selfie
+turn ratings into competitions or shallow category scores, give a number without a credible explanation, usually upload the user's selfie
 to a server, and do not show that their scores agree with real human judgements. We built
-\textbf{MogScan}, a browser app that watches a USB webcam and gives \emph{every} person in the frame (up to
-six) a live PSL score (1--8), a community tier (Sub5 \dots\ HTN, Chadlite, Chad), and a ranked list of
-the measured facial proportions that raise or lower that score: canthal tilt, philtrum-to-chin ratio,
-FWHR, and twelve more. Processing runs fully on-device. The pipeline frontalizes MediaPipe's 478-landmark face mesh and
-computes 15 metrics. It then combines an explainable, sign-constrained ridge model with a fine-tuned
-MobileNetV3. On the official SCUT-FBP5500 60/40 split, our fused model reaches Pearson $r=\fusedR$ against
+\textbf{MogScan}, a browser app that takes a live USB webcam feed or an uploaded photo and gives each face (up to
+six), a live PSL score (1--8), a community tier (Sub5 \dots\ HTN, Chadlite, Chad), and a ranked list of
+the measured facial features that raise or lower that score, from canthal tilt and FWHR to orbital vector,
+skin texture and jawline definition. Processing runs fully on-device. The pipeline frontalizes MediaPipe's
+478-landmark face mesh and computes \nFeatures{} inputs: \nGeometry{} geometric, 3D-depth and symmetry
+measurements, \nShape{} whole-face shape features, \nPixel{} skin, colouring, hair and leanness features from
+the pixels, and \nExpression{} expression blendshapes. It then combines an explainable, sign-constrained
+ridge model over all of them with a fine-tuned MobileNetV3. On the official SCUT-FBP5500 60/40 split, our fused model reaches Pearson $r=\fusedR$ against
 the mean of 60 human raters. That is higher than the dataset's published ResNeXt-50 baseline ($r=0.8777$), and the model
 runs in real time in a browser tab. We also report subgroup bias, which ``looksmax rules'' do and do not
 match human ratings, and a user study with \studyval{\studyN} participants.
@@ -55,14 +57,12 @@ match human ratings, and a user study with \studyval{\studyN} participants.
   \IfFileExists{figures/hero.png}{%
     \includegraphics[width=\linewidth]{figures/hero.png}%
   }{%
-    \fbox{\parbox[c][4.2cm][c]{0.95\linewidth}{\centering\pending{Insert figures/hero.png: MogScan Snapshot
-    with 2--3 consenting people in frame, Guides + Mog battle on}}}%
+    \fbox{\parbox[c][4.2cm][c]{0.95\linewidth}{\centering\pending{Insert figures/hero.png: MogScan screenshot
+    of one consenting person with the card showing}}}%
   }
-  \caption{MogScan scoring several people at once from a single USB webcam. Each face gets a tracked ID,
-  a PSL score and tier, and overlay guides for the measurements behind it (canthal-tilt lines, facial
-  thirds, jaw and cheekbone widths). The side panel lists each person's top strengths and weaknesses
-  with the measured value, the average of the top-20\%-rated faces, and the looksmax community's
-  reference range.}
+  \caption{MogScan scoring a live USB-webcam feed. After a two-second scan the face gets a locked PSL score
+  and tier. The side card shows four pillar sub-scores and the top three strengths and things to improve;
+  every measurement, next to the average of the top-20\%-rated faces, and every model weight are one click away.}
   \Description{Screenshot of the MogScan web app with face boxes, PSL scores and feature cards.}
   \label{fig:teaser}
 \end{figure}
@@ -76,34 +76,44 @@ into a large consumer AI market. Industry reporting put the leading face-rating 
 In 2026 \emph{Omoggle}, an Omegle-style site that pairs two strangers on webcam and declares a ``mogger'',
 spread across Twitch after streamers such as xQc and Asmongold played it on stream~\cite{dexerto2026omoggle}.
 The demand is clear. People want to know where they stand on the community's PSL scale and, more importantly, \emph{why}.
+Omoggle turns this into a competition between strangers. We think most people want the opposite: a private,
+detailed assessment of their own face.
 
 The products serving this demand have four recurring problems:
-(1) \textbf{one face at a time}: selfie apps rate one photo, and Omoggle is strictly 1v1;
+(1) \textbf{shallow measurement}: selfie apps rate one photo on a handful of categories, and Omoggle reduces a face to a duel result;
 (2) \textbf{unexplained numbers}: the scores are opaque, or the ``feature analysis'' is generic text;
 (3) \textbf{privacy}: most apps upload a face photo to a server;
 (4) \textbf{no validation}: we found no competitor that reports how well its scores agree with human
 raters. Coverage of Omoggle notes that camera angle and distance easily flip its results~\cite{dexerto2026omoggle}.
 
 \paragraph{What we built.}
-MogScan is a web app. Plug in any USB webcam, pick it from the camera menu, and everyone in frame is
-scored live (Figure~\ref{fig:teaser}). For each person MogScan shows:
+MogScan is a web app with two inputs: a live camera (any USB webcam, picked from the camera menu) or an
+uploaded photo. Every face in view is scored live (Figure~\ref{fig:teaser}). For each person MogScan shows:
 \begin{itemize}[leftmargin=*,nosep]
   \item a \textbf{PSL score} (1--8), the percentile, and the community tier (Sub3, Sub5, LTN, MTN, HTN, Chadlite, Chad, Adamlite+;
         female variants LTB/MTB/HTB, Stacylite, Stacy);
   \item the \textbf{top three strengths and weaknesses}, each with its measured value, its effect on the score in PSL points,
         the average of top-rated faces, and the community's reference range;
-  \item all \textbf{15 measurements} on demand, plus on-video guides showing where they were taken.
+  \item a \textbf{glow-up plan}: non-surgical actions (skincare, contouring the jawline, filling in brows,
+        grooming, losing facial puffiness, \dots) ranked by the score gain the model predicts for this face, each
+        with a predicted score, plus an overall ``potential'' score (\S\ref{sec:glowup});
+  \item five \textbf{pillar sub-scores} modelled on the looksmax community's breakdown (Harmony, Dimorphism,
+        Angularity/leanness, Softmax, Expression);
+  \item all \textbf{\nFeatures{} inputs} on demand, grouped, each with its value, its learned weights and its
+        effect on the score, available on demand.
 \end{itemize}
-A \emph{Mog battle} mode ranks everyone in frame. A Kind/Brutal toggle changes the wording (Strength vs.\ ``Halo'',
-Room to grow vs.\ ``Failo''). Snapshot saves a shareable image, and Record exports an anonymized numeric session log for our
-user study. Nothing leaves the device.
+The interface is deliberately minimal. There is no competitive mode, ranking or leaderboard: if several
+people are in view, each is scored on their own. Study builds add a Record button that exports an anonymized
+numeric session log for our user study. Nothing leaves the device.
 
 \paragraph{Contributions.}
 \begin{enumerate}[leftmargin=*,nosep]
   \item A real-time, multi-person, fully client-side pipeline: landmarks, tracking, pose gating,
         frontalization, metrics, two models, and fusion, running at camera frame rate in a browser tab.
-  \item An \emph{explainable} geometric model whose per-feature attributions have signs that agree with the
-        evidence, obtained with a sign-constrained ridge regression. We measure the accuracy cost of this constraint.
+  \item An \emph{explainable} feature model over \nFeatures{} inputs whose per-feature attributions have signs that
+        agree with the evidence (or, for a few features, with an uncontroversial prior), obtained with a
+        sign-constrained ridge regression. We measure the accuracy cost of this constraint and what each of the
+        \nGroups{} feature groups adds.
   \item An evaluation on SCUT-FBP5500: accuracy against human raters, subgroup bias, and a
         data-driven check of popular looksmax rules.
   \item Evidence from real users: a usability and value study (\S\ref{sec:study}).
@@ -114,26 +124,25 @@ user study. Nothing leaves the device.
 \label{sec:yc}
 
 \paragraph{Describe what your company does in 50 characters or less.}
-Live, explainable face ratings for groups.
+Private, explainable face ratings, live.
 
 \paragraph{What is your company going to make?}
-A webcam product that rates every face in view in real time and explains the score with measured facial
-proportions. The first product is the free web app described in this paper. Next come a \emph{streamer
-overlay} (an OBS browser source for Twitch and Kick creators who already run mog-battle content) and a mobile
-app with progress tracking.
+A camera-or-photo product that rates a face in real time and explains the score with \nFeatures{} measured
+features. The first product is the free web app described in this paper. Next comes a mobile app with
+progress tracking and a side-profile scan.
 
 \paragraph{Why did you pick this idea? Why now?}
-Two things came together in 2026. First, demand: Omoggle showed that group and live face-rating is
-entertainment people will watch and stream~\cite{dexerto2026omoggle}. Second, capability: browser ML
+Two things came together in 2026. First, demand: Omoggle and the selfie raters showed that live face rating has mass
+appeal~\cite{dexerto2026omoggle,plisio2026looksmax}, but both frame it as competition or a bare number. Second, capability: browser ML
 (MediaPipe Tasks~\cite{kartynnik2019facemesh}, ONNX Runtime Web) is now fast enough to run a 478-point face
 mesh for six people \emph{and} a CNN on a laptop, without a server. That makes ``on-device, nothing
 uploaded'' free for us to offer and costly for server-based competitors to match.
 
 \paragraph{Who are your users and how do you know they need it?}
 (a) 18--25-year-olds in the looksmaxxing community, who already pay \$4--\$10 per week for selfie
-raters~\cite{hyscaler2026looksmax,appstore2026looksmaxpsl}; (b) friend groups and parties, where
-multi-person scoring is a social game; (c) streamers. Evidence from our own study is in \S\ref{sec:study}:
-SUS \studyval{\susMean}, NPS \studyval{\npsScore}, \studyval{\agreeGroup}\% found the group mode fun,
+raters~\cite{hyscaler2026looksmax,appstore2026looksmaxpsl}; (b) people tracking the effect of grooming,
+skin care or weight loss on their face. Evidence from our own study is in \S\ref{sec:study}:
+SUS \studyval{\susMean}, NPS \studyval{\npsScore}, \studyval{\agreePillars}\% found the sub-scores useful,
 and \studyval{\payPct}\% said they would pay for an extended version.
 
 \paragraph{Who are your competitors? What do you understand that they don't?}
@@ -143,11 +152,10 @@ only earn trust if they agree with the evidence, so we validate the score agains
 the explanation model so that its signs cannot contradict the data (\S\ref{sec:geo}).
 
 \paragraph{How will you make money?}
-Free live web app as the acquisition channel. \textbf{MogScan Pro} at \$4.99/month adds history,
-progress tracking, a side-profile scan, and a ``glow-up plan'' of evidence-based, non-surgical suggestions.
+Free live web app, including the glow-up plan, as the acquisition channel. \textbf{MogScan Pro} at
+\$4.99/month adds history, progress tracking against the plan, and a side-profile scan.
 That is cheaper than the \$4--\$10 \emph{per week} the incumbents
-charge~\cite{hyscaler2026looksmax}. \textbf{Creator license} at \$9.99/month: the OBS overlay with
-branding and battle leaderboards. Our marginal compute cost per user is close to zero because inference
+charge~\cite{hyscaler2026looksmax}. Our marginal compute cost per user is close to zero because inference
 runs on the user's device.
 
 \paragraph{Traction so far.}
@@ -172,8 +180,8 @@ release needs a model retrained on licensed or self-collected ratings.
 \toprule
  & \textbf{Omoggle}~\cite{omoggle2026site,dexerto2026omoggle} & \textbf{UMAX / LooksMax AI}~\cite{plisio2026looksmax,hyscaler2026looksmax} & \textbf{PSL rating apps}~\cite{appstore2026looksmaxpsl,bark2026psl} & \textbf{Qoves Studio}~\cite{switchtools2026qoves} & \textbf{MogScan (ours)} \\
 \midrule
-Input & Live webcam, 1v1 with a stranger & One selfie & One selfie & Uploaded photos & Live webcam, \textbf{up to 6 people} \\
-Output & 0--10 score, win/loss, ELO rank & Overall + sub-scores (jaw, skin, \dots) & PSL score + tier & Written report & PSL, tier, percentile, 15 measured metrics with PSL effect \\
+Input & Live webcam, 1v1 with a stranger & One selfie & One selfie & Uploaded photos & Live webcam (up to 6 faces) \textbf{or} photo upload \\
+Output & 0--10 score, win/loss, ELO rank & Overall + sub-scores (jaw, skin, \dots) & PSL score + tier & Written report & PSL, tier, percentile, 5 pillar sub-scores, \nFeatures{} measured inputs with weights and PSL effect \\
 Explanation & Mentions symmetry, canthal tilt, jaw; none shown per user & Category scores & Category scores & Human-written analysis & Per-feature attribution from a validated, sign-constrained model \\
 Validated vs.\ human raters & Not reported; reportedly sensitive to angle and props & Not reported & Not reported & Not reported & Pearson $r=\fusedR$ on a held-out test split \\
 Privacy & Claims on-device & Server upload & Server upload & Server upload & On-device, nothing stored \\
@@ -182,9 +190,10 @@ Price & Free & $\approx$\$4--10 / week & Subscription & $\approx$\$20--200 one-t
 \end{tabularx}
 \end{table*}
 
-Omoggle~\cite{omoggle2026site} is the closest product and the inspiration for this project. It runs a
+Omoggle~\cite{omoggle2026site} is the closest live product. It runs a
 468-landmark face mesh in the browser and turns 10-second 1v1 duels into an ELO ladder
-(Molecule \dots\ Chadlite, Chad, Slayer). Its scoring is a black box, and press coverage notes that camera
+(Molecule \dots\ Chadlite, Chad, Slayer). We deliberately avoid that format: MogScan has no duels, rankings
+or leaderboards. Omoggle's scoring is a black box, and press coverage notes that camera
 angle, distance and props easily change results~\cite{dexerto2026omoggle}. MogScan addresses this with
 \emph{pose gating} and \emph{frontalization} (\S\ref{sec:frontal}). The selfie apps (Umax, LooksMax AI,
 and dozens of PSL raters) show strong demand, but they put results behind paywalls and upload
@@ -235,15 +244,16 @@ proposed~\cite{danner2021ethically}. We report per-subgroup error in Table~\ref{
 \node[box] (mp)  at (2.75,0) {MediaPipe FaceLandmarker\\\scriptsize $\le$6 faces, 478 pts, pose};
 \node[box] (trk) at (5.5,0) {IoU tracker, pose gate\\\scriptsize $|\psi|<14^\circ$, EMA};
 \node[box] (fr)  at (8.25,0) {Procrustes frontalization\\\scriptsize Horn quaternions};
-\node[box] (met) at (11,0) {15 metrics\\\scriptsize canthal tilt, FWHR, \dots};
+\node[box] (met) at (11,0) {\nFeatures{} features\\\scriptsize geometry, depth, skin, \dots};
 \node[box] (geo) at (13.75,0) {Sign-constrained ridge\\\scriptsize per sex + attributions};
 \node[box] (crop) at (5.5,-1.7) {Square crop\\\scriptsize $224{\times}224$};
 \node[box] (cnn)  at (8.25,-1.7) {MobileNetV3\\\scriptsize ONNX Runtime Web};
 \node[box] (fuse) at (13.75,-1.7) {Linear fusion\\\scriptsize PSL $=4+z$ $\rightarrow$ tier};
-\node[box] (ui)   at (16.5,-1.7) {Overlay + cards\\\scriptsize Mog battle, Record};
+\node[box] (ui)   at (16.5,-1.7) {Overlay + cards\\\scriptsize pillars, all weights};
 \draw[arr] (cam) -- (mp); \draw[arr] (mp) -- (trk); \draw[arr] (trk) -- (fr);
 \draw[arr] (fr) -- (met); \draw[arr] (met) -- (geo);
 \draw[arr] (trk) -- (crop); \draw[arr] (crop) -- (cnn);
+\draw[arr] (crop) -- node[above, font=\scriptsize, pos=0.35] {pixels} (met);
 \draw[arr] (cnn) -- node[above, font=\scriptsize] {score, P(male)} (fuse);
 \draw[arr] (geo) -- node[right, font=\scriptsize] {score} (fuse);
 \draw[arr] (fuse) -- (ui);
@@ -295,10 +305,12 @@ $\psi$ and pitch, from the rotation that aligns the face to our frontal template
 MediaPipe's facial transformation matrix for this. That matrix measures rotation relative to the camera ray, so
 in testing a perfectly frontal face near the edge of a wide frame read as $-17^\circ$ of yaw. The Procrustes
 yaw correlates $r=0.99$ with MediaPipe's yaw on the centered dataset images, at about $1.2\times$ the scale. A greedy IoU tracker (match threshold 0.25, 1\,s
-time-to-live) keeps a stable ID per person. Metrics are smoothed with an exponential moving average
-($\alpha=0.15$) and updated \emph{only} while the face is near-frontal ($|\psi|<14^\circ$,
-$|\text{pitch}|<20^\circ$). When someone turns away, the card says ``face the camera'' and the score is
-frozen. This is a direct fix for the angle sensitivity reported for Omoggle.
+time-to-live) keeps a stable ID per person. Each person is \emph{scanned} once: features are collected \emph{only} while the face is near-frontal
+($|\psi|<14^\circ$, $|\text{pitch}|<20^\circ$) until there are 60 frames (about 2\,s) and 12 CNN and pixel
+samples. The result then \emph{locks} to the per-feature median of the scan, so the score, the pillars and the
+strengths and weaknesses no longer jitter from frame to frame. A Rescan button starts over. An earlier
+version smoothed every frame with a moving average; users found the constantly shifting score and
+re-ordering strengths hard to trust. This is a direct fix for the angle sensitivity reported for Omoggle.
 
 \subsection{Frontalization}
 \label{sec:frontal}
@@ -307,16 +319,41 @@ find the rotation that best aligns them to a mean frontal template using Horn's 
 method~\cite{horn1987closed}: the top eigenvector of a $4{\times}4$ symmetric matrix built from the
 cross-covariance. The template is a generalized-Procrustes mean of 1,257 near-frontal \emph{training} faces.
 Metrics are computed on the $x,y$ coordinates of the aligned shape, after removing residual roll so
-that the line between the pupils is horizontal. The browser uses a Jacobi eigen-solver port of the same
-algorithm. Unit tests check it against the Python reference within $10^{-3}$ on five faces, including
-the most strongly turned faces in the dataset.
+that the line between the pupils is horizontal; depth features use the aligned $z$ coordinate. The browser uses a Jacobi eigen-solver port of the same
+algorithm. Unit tests check every geometric, shape and pixel feature against the Python reference within
+$10^{-3}$ on five faces, including the most strongly turned faces in the dataset.
 
-\subsection{The 15 metrics}
-All lengths are normalized by the interpupillary distance (IPD) or the bizygomatic width, so the metrics do not depend
-on how far someone is from the camera. Table~\ref{tab:metrics} gives the landmark definitions.
+\subsection{Features}
+\label{sec:features}
+We set out to measure every factor in popular looksmax rating breakdowns that a single frontal photo can
+support. All lengths are normalized by the interpupillary distance (IPD), the bizygomatic width or the face
+length, so no feature depends on how far someone is from the camera. The \nFeatures{} inputs fall into
+\nGroups{} groups:
+\begin{itemize}[leftmargin=*,nosep]
+  \item \textbf{Eyes, brows, nose, mouth, jaw, proportions} (\nGeometry{} with depth and symmetry): the 15 classic
+        ratios of Table~\ref{tab:metrics} plus canthal asymmetry, intercanthal\,:\,eye width, iris\,:\,eye width,
+        upper and lower scleral show, brow tilt, thickness, length and gap, nose length, bridge and tip width
+        (bulbousness), mouth\,:\,IPD, lip fullness, cupid's-bow depth, mouth-corner tilt, chin height and width,
+        chin taper, ramus length, jaw width\,:\,face length, upper third, temple width, cheekbone height and
+        lower-face fullness.
+  \item \textbf{Profile depth}: a pseudo-profile from the frontalized mesh's $z$ coordinate gives nasal, chin, lip
+        (Ricketts E-line), cheekbone and midface projection, brow-ridge depth, orbital vector, forehead slope,
+        facial convexity and overall face depth.
+  \item \textbf{Symmetry}: overall and per region (eyes, brows, nose, mouth, jaw).
+  \item \textbf{Whole-face shape}: averageness (RMS distance from the mean face), a sexual-dimorphism score
+        (projection on the male--female mean shape difference) and 12 shape principal components.
+  \item \textbf{Pixels} (\nPixel{}, from a $160{\times}160$ crop): skin brightness, tone unevenness, texture, redness,
+        undertone and under-eye darkness; lip, eye, brow and lash-line contrast, sclera brightness and eye
+        colour; hair darkness and texture and facial hair; and leanness cues (jawline shadow, cheek hollowness,
+        neck width).
+  \item \textbf{Expression}: MediaPipe's \nExpression{} blendshapes (smile, squint, brow raise, \dots).
+\end{itemize}
+Physique, shoulder width, body fat below the face and clothing, which appear in some looksmax checklists,
+cannot be measured from a face crop and have no ratings in the training data, so we leave them out.
+Table~\ref{tab:metrics} lists the landmark definitions of the 15 classic ratios; the code documents the rest.
 
 \begin{table}[t]
-\caption{Metrics (MediaPipe landmark indices in parentheses).}
+\caption{The 15 classic looksmax ratios (MediaPipe landmark indices in parentheses).}
 \label{tab:metrics}
 \footnotesize
 \begin{tabularx}{\linewidth}{@{}lX@{}}
@@ -342,20 +379,24 @@ Jaw angle & projected angle zygion--gonion--menton (234--172--152, 454--397--152
 \end{tabularx}
 \end{table}
 
-\subsection{Explainable geometric model}
+\subsection{Explainable feature model}
 \label{sec:geo}
-For each sex we standardize every metric ($z_i$, clipped to $\pm4$) and fit
+For each sex we standardize every feature ($z_i$, clipped to $\pm4$) and fit
 \[
-\hat y_{\text{geo}} = b + \sum_{i=1}^{15}\big(\beta_i z_i + \gamma_i (z_i^2-1)\big) + \text{pose terms},
+\hat y_{\text{geo}} = b + \sum_{i=1}^{\nFeatures}\big(\beta_i z_i + \gamma_i (z_i^2-1)\big) + \text{pose terms},
 \]
 where the pose terms ($|\psi|$, $|\text{pitch}-\text{median}|$) absorb any remaining pose effects during training and are
 set to zero at inference. In the \emph{sign-constrained} variant, $\operatorname{sign}(\beta_i)$ must match
 the sign of metric $i$'s marginal correlation with the rating, and $\gamma_i\le0$, so any curvature can only
-express an ``ideal range'' (an inverted U). We solve it as non-negative ridge regression on a re-signed
+express an ``ideal range'' (an inverted U). For 16 features whose good direction is not in dispute
+(asymmetry, uneven or rough skin, a bulbous nose tip, dark circles, lower-face puffiness, jawline definition,
+\dots) the sign comes from that prior instead. Without it, confounds in the photos would make the app call
+``patchy skin'' or ``asymmetry'' a strength; if the data disagree with the prior, the weight goes to zero. We solve it as non-negative ridge regression on a re-signed
 design matrix, with $\alpha$ chosen by 5-fold cross-validation. Because the model is additive, the contribution
 $c_i=\beta_i z_i+\gamma_i(z_i^2-1)$ is exact and has zero mean over the training set, so it reads as
-``points above or below an average face.'' The UI shows $c_i/\sigma_y$ in PSL units and the top three
-positive and negative contributions. The ``top-tier average'' shown for each metric is that metric's mean
+``points above or below an average face.'' The UI shows $c_i/\sigma_y$ in PSL units, the top three
+positive and negative contributions, every feature's $\beta_i$, $\gamma_i$ and importance (the SD of $c_i$),
+and pillar sub-scores that sum the contributions of each pillar's feature groups. The ``top-tier average'' shown for each metric is that metric's mean
 over the top 20\% of rated training faces of the same sex.
 
 \subsection{CNN}
@@ -366,7 +407,7 @@ training and live inputs are framed the same way. Training used 85\% of the offi
 15\% held out for validation. Settings: AdamW, one-cycle learning rate with a peak of $3{\times}10^{-4}$, batch 32,
 25 epochs, flips, $\pm8^\circ$ affine and color jitter. We kept the epoch with the best validation correlation
 ($r=\bestValR$). The model is exported to ONNX (opset 17, 13.9\,MB) and runs in ONNX Runtime Web (WASM).
-A round-robin scheduler sends one face to the CNN every 120\,ms, and the outputs are smoothed per track.
+A round-robin scheduler sends one still-scanning face to the CNN every 120\,ms.
 
 \subsection{Fusion and PSL calibration}
 A linear regression on the validation set combines the two models:
@@ -377,11 +418,27 @@ covers the middle (3.75--4.5), HTN is roughly the top 31\%, Chadlite the top 10\
 2.3\% ($\ge6$). The detected sex chooses the geometric model and the tier names, and users can correct it by
 clicking the sex badge on their card.
 
+\subsection{Glow-up plan}
+\label{sec:glowup}
+Fourteen non-surgical actions are each mapped to the features they plausibly change, for example
+contouring the jawline $\rightarrow$ jaw definition, a skincare routine $\rightarrow$ skin texture and
+evenness, brow pencil $\rightarrow$ brow darkness and thickness, and a calorie deficit $\rightarrow$ lower-face
+fullness, cheek hollowness and jaw definition. For each action we move those features halfway from the
+person's values toward the average of top-rated faces of the same sex, re-run the feature model, and report
+the change in PSL on the same scale as the per-feature effects (change in rating / $\sigma$). Actions that
+gain less than 0.03 PSL are hidden, and the rest are ranked by gain. Applying all of them at once gives the
+``potential'' score. This is a counterfactual \emph{of the model}, not a causal claim about the person; the
+app says so and invites a rescan after a real change. By design the plan never suggests surgery, injectables,
+or UV tanning; self-tanner or bronzer stands in for a tan.
+
 \subsection{Interface and privacy}
-The app is built with React and TypeScript on Vite. Everything is drawn on one canvas: the video, corner-bracket boxes
-colored by tier, the PSL and tier label, and optional guides and mesh. All model files and wasm runtimes are
-served from the app itself, so it also works offline on demo day. No frame is ever sent over the network;
-Snapshot and Record save files locally. Record logs \emph{numbers only} (per-person PSL, model
+The app is built with React and TypeScript on Vite. The toolbar has only two inputs: a camera picker for the
+live feed and an Upload photo button. The video is drawn on one canvas with a deliberately light overlay: thin corner marks, a
+scan-progress line, and one small label with the PSL and tier. The side card shows the score, four pillar
+bars and three strengths and three things to improve; the full measurement list and the model weights are
+one click away rather than on screen by default. All model files and wasm
+runtimes are served from the app itself, so it also works offline on demo day. No frame or uploaded photo is
+ever sent over the network. In study builds (\texttt{?study}), Record saves a log file locally. Record logs \emph{numbers only} (per-person PSL, model
 outputs, yaw, fps). An opening screen asks for confirmation that everyone in frame is 18+ and has consented.
 
 \subsection{Replicating the system}
@@ -406,7 +463,9 @@ AlexNet~\cite{liang2018scut} & 0.8298 & -- & -- \\
 ResNet-18~\cite{liang2018scut} & 0.8513 & -- & -- \\
 ResNeXt-50~\cite{liang2018scut} & 0.8777 & -- & -- \\
 \midrule
-Ours: geometry only (constrained ridge) & \geoR & \geoMAE & \geoRMSE \\
+Ours: 15 classic ratios only (constrained) & \origFifteenR & -- & -- \\
+Ours: all \nFeatures{} features (unconstrained) & \freeR & -- & -- \\
+Ours: all \nFeatures{} features (constrained) & \geoR & \geoMAE & \geoRMSE \\
 Ours: MobileNetV3 CNN & \cnnR & \cnnMAE & \cnnRMSE \\
 Ours: fused (deployed) & \textbf{\fusedR} & \textbf{\fusedMAE} & \textbf{\fusedRMSE} \\
 \bottomrule
@@ -416,9 +475,10 @@ Ours: fused (deployed) & \textbf{\fusedR} & \textbf{\fusedMAE} & \textbf{\fusedR
 Table~\ref{tab:results} and Figure~\ref{fig:scatter} show the results. The fused model reaches $r=\fusedR$
 on the held-out test split. That is higher than all three of the dataset paper's 60/40 baselines, although
 it is below recent large research models ($\approx$0.92~\cite{boukhari2025synergynet}), which are not
-designed for real-time use in a browser. The geometry-only model ($r=\geoR$) is much weaker than the CNN. Proportions explain a large part
-of attractiveness, but skin, hair, expression and other texture cues matter too. Its value is in
-the explanations. The sex head reaches \sexAcc\% accuracy. On the PSL scale the mean absolute error is
+designed for real-time use in a browser. Expanding the explainable model from the 15 classic ratios ($r=\origFifteenR$) to all \nFeatures{} inputs
+raises it to $r=\geoR$, close to the unconstrained fit ($r=\freeR$), so the sign constraints that keep the
+explanations honest cost little. It is still weaker than the CNN, which sees everything at once, but it now
+carries enough independent signal to earn a larger fusion weight (\wGeo). The sex head reaches \sexAcc\% accuracy. On the PSL scale the mean absolute error is
 \pslMAE\ points, the exact tier matches in \tierExact\% of test faces, and the tier is within one step in
 \tierWithinOne\%.
 
@@ -430,9 +490,37 @@ the explanations. The sex head reaches \sexAcc\% accuracy. On the PSL scale the 
 \label{fig:scatter}
 \end{figure}
 
+\subsection{What each data source adds}
+Table~\ref{tab:ablation} and Figure~\ref{fig:ablation} refit the explainable model on each feature group alone
+and on everything \emph{except} each group. Whole-face shape is the strongest single group, and proportions,
+jaw and expression also carry a lot of signal on their own. Most groups overlap heavily, so removing any one
+costs little; colouring \& contrast and skin are the groups whose information no other group duplicates.
+
+\begin{table}[t]
+\caption{Ablation of the explainable model (test Pearson $r$). ``Without'' is the change in $r$ when the group is removed.}
+\label{tab:ablation}
+\footnotesize
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Group & Features & Alone & Without \\
+\midrule
+\csname @@input\endcsname generated/ablation_table.tex
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/ablation.pdf}
+\caption{Test $r$ of the explainable model using each feature group alone (bars) and the drop in $r$ when that
+group is removed from the full model ($\times10$, dots). Dashed line: all groups.}
+\Description{Horizontal bar chart of per-group ablation.}
+\label{fig:ablation}
+\end{figure}
+
 \subsection{Do looksmax rules hold up?}
-Figure~\ref{fig:metric_corr} shows each metric's raw correlation with the human rating, measured on
-frontalized landmarks. The strongest single metric is \emph{\topMetric} ($r=\topMetricR$, averaged
+Figure~\ref{fig:metric_corr} shows the 25 features with the strongest raw correlation with the human rating.
+The strongest single feature is \emph{\topMetric} ($r=\topMetricR$, averaged
 across sexes). Several community rules do \emph{not} hold up for these raters:
 \begin{itemize}[leftmargin=*,nosep]
   \item \textbf{Canthal tilt}, the best-known looksmax metric, has essentially no correlation ($r\approx0.00$). Before
@@ -453,7 +541,7 @@ instead of repeating forum rules, and why pose control is necessary for any meas
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.95\linewidth]{figures/metric_corr.pdf}
-\caption{Correlation of each frontalized metric with human ratings (training split), split by sex.}
+\caption{The 25 features most correlated with human ratings (training split), split by sex.}
 \Description{Horizontal bar chart of correlations.}
 \label{fig:metric_corr}
 \end{figure}
@@ -487,11 +575,11 @@ Google Form to study/responses.csv and the session logs to study/logs/, run anal
 analyze\_logs.py and make\_figures.py, then rebuild this PDF. Every number in this section is filled in
 automatically. Do not type numbers by hand.}
 \else
-We ran \studyN\ adult participants in groups of 2--3 (protocol in \texttt{study/protocol.md}). Each
-person did a solo scan, then a group scan with Mog battle on, then a survey. Usability was \textbf{SUS
+We ran \studyN\ adult participants one at a time (protocol in \texttt{study/protocol.md}). Each
+person did a live scan, then uploaded a photo of themselves, then filled out a survey. Usability was \textbf{SUS
 \susMean} ($SD=\susSD$)~\cite{brooke1996sus}, and the Net Promoter Score~\cite{reichheld2003one} was \textbf{\npsScore}.
 \agreeAcc\% agreed that the score felt accurate, \agreeFeatures\% that the feature list was useful,
-\agreeGroup\% that group scanning was fun, and \agreePrivacy\% that on-device processing made them more
+\agreePillars\% that the pillar sub-scores were useful, and \agreePrivacy\% that on-device processing made them more
 comfortable. \payPct\% would pay for an extended version. As a wellbeing check, \agreeFeelbad\% agreed that
 MogScan made them feel worse about their appearance (Figure~\ref{fig:likert}).
 \begin{figure}[t]
@@ -520,7 +608,7 @@ body dissatisfaction~\cite{bark2026psl}. Our mitigations:
 \begin{itemize}[leftmargin=*,nosep]
   \item an 18+ and consent screen;
   \item on-device processing with no storage;
-  \item ``Kind'' wording by default;
+  \item no competitive features: no rankings, duels or leaderboards between people;
   \item honest framing in the app (``a model's estimate of how one panel judged faces, not your worth'');
   \item a wellbeing item in our survey.
 \end{itemize}
@@ -529,7 +617,8 @@ Technical limitations:
   \item SCUT faces are studio-like frontal photos, while webcam frames vary in lighting and lens distortion, so there is
         domain shift;
   \item the mesh starts at the upper forehead, so true facial thirds and full face length are approximations;
-  \item the jaw angle is a 2D projection;
+  \item the jaw angle is a 2D projection, and depth features come from a monocular mesh, so they approximate a true profile;
+  \item pixel features depend on lighting and camera; they were learned on studio photos;
   \item the dataset covers two ethnic groups and only binary sex labels.
 \end{itemize}
 Commercial use would require licensed training data.
@@ -540,11 +629,11 @@ Commercial use would require licensed training data.
         and publish subgroup error before any commercial launch.
   \item \textbf{Side-profile scan:} gonial angle, chin projection and the Ricketts E-line need a profile view. Prompt users to turn
         their head and fuse the measurements.
-  \item \textbf{Streamer overlay:} an OBS browser source with a transparent background and battle ELO, aimed at
-        the creators who popularized Omoggle.
-  \item \textbf{Progress tracking and glow-up plan:} longitudinal, pose-normalized measurements with evidence-based,
-        non-surgical suggestions (grooming, skin care, posture). Never surgery prompts.
-  \item \textbf{Better CNN explanations:} Grad-CAM heatmaps for the texture cues the geometric model cannot see, and a WebGPU
+  \item \textbf{Progress tracking:} longitudinal, pose-normalized rescans that check whether the glow-up plan's
+        predicted gains actually happen, so the plan can be recalibrated on real before/after data.
+  \item \textbf{Body and presentation:} a pose model and full-body ratings would let us add the physique,
+        shoulder-width and clothing factors that some looksmax checklists include.
+  \item \textbf{Better CNN explanations:} Grad-CAM heatmaps for the texture cues the feature model cannot see, and a WebGPU
         backend for higher frame rates with six people in frame.
 \end{itemize}
 

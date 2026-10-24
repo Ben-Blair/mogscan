@@ -1,26 +1,32 @@
 import type { NormalizedLandmark } from '@mediapipe/tasks-vision'
-import { METRIC_NAMES, type Metrics } from '../scoring/metrics'
+import type { Features } from '../scoring/metrics'
+import { OneEuro } from './oneEuro'
 
 export interface Box { x: number; y: number; w: number; h: number }
 
 export interface Track {
   id: number
   box: Box
+  /** Smoothed box for drawing only (One Euro filtered), so the on-screen frame doesn't jitter. */
+  displayBox: Box
+  boxFilters: OneEuro[]
   landmarks: NormalizedLandmark[]
   yaw: number
   pitch: number
   frontal: boolean
   lastSeen: number
-  /** Exponentially smoothed metrics (only updated while frontal). */
-  metrics: Metrics | null
-  frontalFrames: number
-  cnn: number | null
-  pMale: number | null
+  /** Per-frame landmark features (geometry, shape, expression), collected while frontal during a scan. */
+  frames: Features[]
+  /** Pixel features + CNN outputs, sampled together about every 120 ms during a scan. */
+  crops: { appearance: Features; cnn: number; pMale: number }[]
+  /** The scan result: per-feature medians over the scan. Fixed until a rescan, so the score doesn't jitter. */
+  locked: { features: Features; cnn: number; pMale: number } | null
   lastCnn: number
 }
 
-const METRIC_ALPHA = 0.15
-const CNN_ALPHA = 0.3
+/** A scan collects this many frontal frames (~2 s) and crop samples before the result locks. */
+export const SCAN_FRAMES = 60
+export const SCAN_CROPS = 12
 const TRACK_TTL_MS = 1000
 // Apparent pose from Procrustes alignment, which reads ~1.2x MediaPipe's matrix angles.
 export const MAX_YAW = 14
@@ -42,7 +48,26 @@ export function landmarkBox(lm: NormalizedLandmark[], w: number, h: number): Box
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }
 }
 
-export interface Detection { landmarks: NormalizedLandmark[]; box: Box; yaw: number; pitch: number; metrics: Metrics }
+function median(v: number[]): number {
+  const s = [...v].sort((a, b) => a - b)
+  const m = s.length >> 1
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+}
+
+/** Per-key median over a list of feature records. */
+function medianFeatures(rows: Features[]): Features {
+  const out: Features = {}
+  for (const k of Object.keys(rows[0])) out[k] = median(rows.map((r) => r[k]).filter((v) => Number.isFinite(v)))
+  return out
+}
+
+/** Scan progress 0–1 (1 = locked). */
+export function scanProgress(t: Track): number {
+  if (t.locked) return 1
+  return Math.min(t.frames.length / SCAN_FRAMES, t.crops.length / SCAN_CROPS)
+}
+
+export interface Detection { landmarks: NormalizedLandmark[]; box: Box; yaw: number; pitch: number; metrics: Features }
 
 /** Greedy IoU tracker that keeps per-person identity and smoothed measurements. */
 export class FaceTracker {
@@ -61,8 +86,9 @@ export class FaceTracker {
     }
     dets.forEach((d, di) => {
       if (usedD.has(di)) return
-      const t: Track = { id: this.nextId++, box: d.box, landmarks: d.landmarks, yaw: d.yaw, pitch: d.pitch,
-        frontal: false, lastSeen: now, metrics: null, frontalFrames: 0, cnn: null, pMale: null, lastCnn: 0 }
+      const t: Track = { id: this.nextId++, box: d.box, displayBox: d.box,
+        boxFilters: [0, 1, 2, 3].map(() => new OneEuro(0.8, 0.015)), landmarks: d.landmarks, yaw: d.yaw, pitch: d.pitch,
+        frontal: false, lastSeen: now, frames: [], crops: [], locked: null, lastCnn: 0 }
       this.apply(t, d, now)
       this.tracks.push(t)
     })
@@ -72,21 +98,41 @@ export class FaceTracker {
 
   private apply(t: Track, d: Detection, now: number) {
     t.box = d.box; t.landmarks = d.landmarks; t.yaw = d.yaw; t.pitch = d.pitch; t.lastSeen = now
+    const [fx, fy, fw, fh] = t.boxFilters
+    t.displayBox = { x: fx.filter(d.box.x, now), y: fy.filter(d.box.y, now), w: fw.filter(d.box.w, now), h: fh.filter(d.box.h, now) }
     t.frontal = Math.abs(d.yaw) < MAX_YAW && Math.abs(d.pitch) < MAX_PITCH
-    if (!t.frontal) return
-    t.frontalFrames++
-    if (!t.metrics) { t.metrics = { ...d.metrics }; return }
-    for (const k of METRIC_NAMES) t.metrics[k] += METRIC_ALPHA * (d.metrics[k] - t.metrics[k])
+    if (!t.frontal || t.locked) return
+    if (t.frames.length < SCAN_FRAMES) t.frames.push(d.metrics)
+    this.tryLock(t)
   }
 
-  setCnn(t: Track, score: number, pMale: number, now: number) {
-    t.cnn = t.cnn === null ? score : t.cnn + CNN_ALPHA * (score - t.cnn)
-    t.pMale = t.pMale === null ? pMale : t.pMale + CNN_ALPHA * (pMale - t.pMale)
+  addCrop(t: Track, appearance: Features, cnn: number, pMale: number, now: number) {
     t.lastCnn = now
+    if (t.locked) return
+    if (t.crops.length < SCAN_CROPS) t.crops.push({ appearance, cnn, pMale })
+    this.tryLock(t)
   }
 
-  /** The visible, frontal track that has waited longest for a CNN update. */
+  private tryLock(t: Track) {
+    if (t.frames.length < SCAN_FRAMES || t.crops.length < SCAN_CROPS) return
+    t.locked = {
+      features: { ...medianFeatures(t.frames), ...medianFeatures(t.crops.map((c) => c.appearance)) },
+      cnn: median(t.crops.map((c) => c.cnn)),
+      pMale: median(t.crops.map((c) => c.pMale)),
+    }
+    t.frames = []
+    t.crops = []
+  }
+
+  /** Throw away the result and scan this person again. */
+  rescan(id: number) {
+    const t = this.tracks.find((x) => x.id === id)
+    if (t) { t.locked = null; t.frames = []; t.crops = [] }
+  }
+
+  /** The visible, frontal, still-scanning track that has waited longest for a crop sample. */
   nextForCnn(now: number): Track | undefined {
-    return this.tracks.filter((t) => t.lastSeen === now && t.frontal).sort((a, b) => a.lastCnn - b.lastCnn)[0]
+    return this.tracks.filter((t) => t.lastSeen === now && t.frontal && !t.locked)
+      .sort((a, b) => a.lastCnn - b.lastCnn)[0]
   }
 }

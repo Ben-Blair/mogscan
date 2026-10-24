@@ -8,6 +8,7 @@ export async function createLandmarker(maxFaces = 6): Promise<FaceLandmarker> {
     baseOptions: { modelAssetPath: `${BASE}models/face_landmarker.task`, delegate },
     runningMode: 'VIDEO' as const,
     numFaces: maxFaces,
+    outputFaceBlendshapes: true,
     minFaceDetectionConfidence: 0.5,
     minFacePresenceConfidence: 0.5,
     minTrackingConfidence: 0.5,

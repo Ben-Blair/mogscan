@@ -55,7 +55,7 @@
 \vspace{6mm}
 But every product we tested:
 \begin{itemize}
-  \item rates \textbf{one face at a time}: one selfie, or Omoggle's 1v1
+  \item turns your face into a \textbf{competition} (Omoggle's 1v1) or a few vague categories
   \item gives a \textbf{number without a reason} you can check
   \item \textbf{uploads your face} to a server
   \item has \textbf{never shown} that its score matches what real people think
@@ -63,17 +63,19 @@ But every product we tested:
 \end{frame}
 
 % 3 ------------------------------------------------------------------------------------------------
-\begin{frame}{MogScan: everyone in frame, scored live, with receipts}
+\begin{frame}{MogScan: your face, scored live, with receipts}
 \begin{columns}[c]
 \column{0.62\textwidth}
 \IfFileExists{../writeup/figures/hero.png}{\includegraphics[width=\linewidth]{hero.png}}{%
-  \fcolorbox{muted}{panel}{\parbox[c][4.6cm][c]{0.95\linewidth}{\centering\pending{Snapshot of 2--3 people\\ save as writeup/figures/hero.png}}}}
+  \fcolorbox{muted}{panel}{\parbox[c][4.6cm][c]{0.95\linewidth}{\centering\pending{Screenshot of one person\\ save as writeup/figures/hero.png}}}}
 \column{0.38\textwidth}
 \begin{itemize}\setlength\itemsep{2mm}
-  \item Any \textbf{USB webcam}, up to \textbf{6 people}
+  \item \textbf{Live camera} (any USB webcam) \textbf{or photo upload}
   \item \textbf{PSL 1--8} + tier (LTN \dots\ HTN, Chadlite, Chad)
-  \item Top \textbf{strengths \& weaknesses} with measured values
-  \item \textbf{Mog battle} leaderboard
+  \item \textbf{Harmony, Dimorphism, Angularity, Softmax} sub-scores
+  \item All \textbf{\nFeatures{} inputs} with their weights
+  \item \textbf{Glow-up plan} with a predicted score
+  \item No battles, no leaderboards
   \item 100\% \textbf{on-device}
 \end{itemize}
 \end{columns}
@@ -83,7 +85,7 @@ But every product we tested:
 \begin{frame}[plain]
 \vfill\centering
 {\fontsize{60}{66}\selectfont\bfseries\textcolor{lime}{LIVE DEMO}}\\[6mm]
-\textcolor{muted}{solo scan $\rightarrow$ turn your head $\rightarrow$ group scan $\rightarrow$ mog battle $\rightarrow$ brutal mode}
+\textcolor{muted}{live scan $\rightarrow$ turn your head $\rightarrow$ open all \nFeatures{} weights $\rightarrow$ upload a photo}
 \vfill
 \end{frame}
 
@@ -101,7 +103,7 @@ But every product we tested:
 \node[box] (mp)  at (3.1,0) {MediaPipe\\\scriptsize 478 landmarks, $\le$6 faces};
 \node[box] (trk) at (6.2,0) {Tracker\\\scriptsize IDs, pose gate, smoothing};
 \node[hi]  (fr)  at (9.3,0) {Frontalize\\\scriptsize Procrustes / Horn};
-\node[box] (met) at (12.4,0) {15 metrics\\\scriptsize canthal tilt, FWHR, \dots};
+\node[box] (met) at (12.4,0) {\nFeatures{} features\\\scriptsize geometry, 3D, skin, \dots};
 \node[hi]  (geo) at (15.5,0) {Explainable ridge\\\scriptsize sign-constrained};
 \node[box] (crop) at (6.2,-2.2) {Face crop};
 \node[hi]  (cnn)  at (9.3,-2.2) {MobileNetV3 CNN\\\scriptsize ONNX in browser};
@@ -131,7 +133,8 @@ Model (official 60/40 split) & Pearson $r$ \\
 \textcolor{muted}{ResNet-18 (SCUT paper)} & \textcolor{muted}{0.851} \\
 \textcolor{muted}{ResNeXt-50 (SCUT paper)} & \textcolor{muted}{0.878} \\
 \midrule
-Ours: geometry only & \geoR \\
+Ours: 15 classic ratios & \origFifteenR \\
+Ours: all \nFeatures{} features (explainable) & \geoR \\
 Ours: CNN & \cnnR \\
 \textbf{Ours: fused (live app)} & \textbf{\textcolor{lime}{\fusedR}} \\
 \bottomrule
@@ -214,8 +217,8 @@ Group & $n$ & $r$ & MAE & Signed bias \\
  & Omoggle & UMAX/LooksMax & PSL apps & Qoves & \textcolor{lime}{\textbf{MogScan}} \\
 \midrule
 Live webcam & \checkmark & -- & -- & -- & \textcolor{lime}{\checkmark} \\
-Multi-person & 1v1 & -- & -- & -- & \textcolor{lime}{up to 6} \\
-Per-feature measurements & -- & categories & categories & report & \textcolor{lime}{15 metrics} \\
+Competitive format & 1v1 duels & -- & -- & -- & \textcolor{lime}{none} \\
+Per-feature measurements & -- & categories & categories & report & \textcolor{lime}{\nFeatures{} inputs + weights} \\
 Validated vs.\ humans & -- & -- & -- & -- & \textcolor{lime}{$r=\fusedR$} \\
 On-device & claimed & -- & -- & -- & \textcolor{lime}{\checkmark} \\
 Price & free & \$4--10/wk & sub & \$20--200 & \textcolor{lime}{free; \$4.99/mo} \\
@@ -228,16 +231,13 @@ measurements agree with real ratings and survive head movement.
 % 11 -----------------------------------------------------------------------------------------------
 \begin{frame}{Business model}
 \begin{columns}[t]
-\column{0.33\textwidth}
+\column{0.45\textwidth}
 \textcolor{lime}{\textbf{Free web app}}\\[1mm]\small
-Live scanning and mog battles. This is the acquisition channel and is easy to share as a link.
-\column{0.33\textwidth}
+Live camera and photo scoring with full explanations. This is the acquisition channel and is easy to share as a link.
+\column{0.45\textwidth}
 \textcolor{lime}{\textbf{Pro --- \$4.99 / mo}}\\[1mm]\small
-History, progress tracking, side-profile scan, evidence-based glow-up plan.
+History, progress tracking against your glow-up plan, side-profile scan.
 Cheaper than incumbents' \emph{weekly} price.
-\column{0.33\textwidth}
-\textcolor{lime}{\textbf{Creator --- \$9.99 / mo}}\\[1mm]\small
-OBS overlay for Twitch/Kick ``mog battle'' streams, with branding and leaderboards.
 \end{columns}
 \vspace{8mm}
 \centering\textcolor{muted}{Inference runs on the user's device, so marginal compute cost is close to \$0.}
@@ -248,7 +248,7 @@ OBS overlay for Twitch/Kick ``mog battle'' streams, with branding and leaderboar
 \begin{itemize}\setlength\itemsep{2mm}
   \item 18+ and consent screen; only scan people who agree
   \item Nothing uploaded or stored; study logs are numbers only
-  \item ``Kind'' wording by default; the score is framed as \emph{one panel's judgement}, not your worth
+  \item No battles, rankings or leaderboards; the score is framed as \emph{one panel's judgement}, not your worth
   \item We measure wellbeing in the study (``felt worse about my looks'')
   \item Known limits: two ethnic groups, binary sex labels, webcam domain shift, non-commercial dataset license
 \end{itemize}
@@ -261,8 +261,7 @@ OBS overlay for Twitch/Kick ``mog battle'' streams, with branding and leaderboar
 \begin{itemize}\setlength\itemsep{2mm}
   \item Diverse, licensed rating dataset $\rightarrow$ retrain and publish subgroup error
   \item Side-profile scan: gonial angle, chin projection, E-line
-  \item OBS streamer overlay with battle ELO
-  \item Progress tracking + glow-up plan
+  \item Progress tracking against the glow-up plan
   \item Grad-CAM heatmaps and a WebGPU backend
 \end{itemize}
 \column{0.4\textwidth}

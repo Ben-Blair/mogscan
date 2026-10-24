@@ -17,9 +17,9 @@ import matplotlib.pyplot as plt  # noqa: E402
 
 HERE = Path(__file__).parent
 FIG = HERE.parent / "writeup" / "figures"
-LIKERT = ["ACC", "STABLE", "EXPLAIN", "FEATURES", "GROUP", "PRIVACY", "BETTER", "FEELBAD"]
+LIKERT = ["ACC", "STABLE", "EXPLAIN", "FEATURES", "PILLARS", "PRIVACY", "BETTER", "FEELBAD"]
 LIKERT_LABELS = {"ACC": "Score felt accurate", "STABLE": "Score was stable", "EXPLAIN": "Understood why",
-                 "FEATURES": "Feature list useful", "GROUP": "Group scan fun", "PRIVACY": "On-device reassuring",
+                 "FEATURES": "Feature list useful", "PILLARS": "Sub-scores useful", "PRIVACY": "On-device reassuring",
                  "BETTER": "Better than other apps", "FEELBAD": "Felt worse about looks"}
 
 
@@ -55,7 +55,7 @@ def main(path=HERE / "responses.csv"):
     out["nps"] = {"score": float(((nps >= 9).mean() - (nps <= 6).mean()) * 100), "mean": float(nps.mean()),
                   "promoters": int((nps >= 9).sum()), "passives": int(((nps >= 7) & (nps <= 8)).sum()),
                   "detractors": int((nps <= 6).sum())}
-    for k in ("PAY", "TONE", "PRIOR", "AGE"):
+    for k in ("PAY", "PRIOR", "AGE"):
         if k in df:
             out[k.lower()] = df[k].value_counts().to_dict()
     (HERE / "out").mkdir(exist_ok=True)

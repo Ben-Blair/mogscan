@@ -5,12 +5,12 @@ Measure four things: usability (SUS), perceived accuracy and usefulness of the e
 and willingness to pay. The session logs also give an objective measure of score stability and frame rate.
 
 **Who:** 8–15 adults (18+), recruited from friends, classmates, and dorm/club members.
-Ask in pairs or small groups. MogScan's differentiator is multi-person scanning, so groups exercise it.
+Run one participant at a time.
 
-**Time per session:** about 15 minutes for a group of 2–3.
+**Time per session:** about 10 minutes per participant.
 
 **Equipment:**
-- A laptop running MogScan (`npm run dev` or the deployed URL)
+- A laptop running MogScan with `?study` added to the URL (shows the Record button), via `npm run dev` or the deployed URL
 - A USB webcam at eye level, 1–1.5 m away
 - Even, front-facing light
 - The Google Form open on a phone
@@ -21,9 +21,9 @@ Ask in pairs or small groups. MogScan's differentiator is multi-person scanning,
 2. **Solo scan (3 min each).** The participant sits alone in frame. Press **● Record**.
    Ask them to look at the camera and hold still for about 10 seconds. Then ask them to slowly turn their head
    left and right; this tests pose gating. Press **■ Stop & save log**. Let them read their card and expand
-   "Show all 15 measurements".
-3. **Group scan (3 min).** 2–3 participants are in frame together. Record again. Turn on **Mog battle**.
-   Try **Brutal mode** if they want.
+   "Show all 143 inputs and their weights".
+3. **Photo upload (2 min).** The participant uploads a front-facing photo of themselves from their phone or laptop
+   with **Upload photo**, compares the result with their live score, then returns with **Live camera**.
 4. **Survey (5 min).** Each participant fills out the Google Form on their own phone (questions in `survey.md`).
 5. **Debrief (1 min).** Remind them that the score reflects the biases of one dataset (60 young raters scoring
    Asian and Caucasian faces only), not their worth.

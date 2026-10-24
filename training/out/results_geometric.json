@@ -1,100 +1,2066 @@
 {
+  "n_features": 143,
+  "groups": {
+    "eyes": 9,
+    "brows": 5,
+    "nose": 5,
+    "mouth": 7,
+    "jaw": 8,
+    "proportions": 8,
+    "depth": 10,
+    "symmetry": 6,
+    "shape": 14,
+    "skin": 6,
+    "colouring": 8,
+    "hair": 3,
+    "leanness": 3,
+    "expression": 51
+  },
   "M_free": {
-    "pearson": 0.6950031632581448,
-    "mae": 0.35821285241035145,
-    "rmse": 0.4592541053601186
+    "pearson": 0.8078766417043886,
+    "mae": 0.2913576528410098,
+    "rmse": 0.377021735565663
   },
   "M": {
-    "pearson": 0.6895949398330793,
-    "mae": 0.35964331680053324,
-    "rmse": 0.46263610238493974,
-    "alpha": 0.35622478902624444,
+    "pearson": 0.7925853907421695,
+    "mae": 0.30425939030050275,
+    "rmse": 0.38938922749390414,
+    "prior_conflicts": [
+      "nose_tip_width",
+      "symmetry",
+      "sym_eyes",
+      "sym_brows",
+      "sym_nose",
+      "sym_mouth",
+      "sym_jaw",
+      "skin_tone_var",
+      "under_eye",
+      "sclera_bright"
+    ],
+    "alpha": 67.0018750350959,
     "active_metrics": [
       "canthal_tilt",
+      "canthal_asym",
       "eye_spacing",
+      "intercanthal_eye",
+      "eye_width",
+      "iris_fill",
+      "scleral_show",
+      "upper_scleral",
+      "brow_eye",
+      "brow_tilt",
+      "brow_thickness",
+      "brow_gap",
+      "nose_intercanthal",
+      "nose_face",
+      "nose_length",
+      "mouth_nose",
+      "lip_ratio",
+      "lip_fullness",
+      "philtrum_lower",
+      "chin_philtrum",
+      "chin_height",
+      "chin_width",
+      "jaw_angle",
+      "chin_angle",
+      "ramus",
       "fwhr",
       "midface_ratio",
       "lower_third",
-      "chin_philtrum",
-      "nose_intercanthal",
-      "mouth_nose",
-      "jaw_cheek",
-      "lip_ratio",
-      "eye_aspect",
-      "brow_eye",
-      "face_lw"
+      "upper_third",
+      "temple_cheek",
+      "cheekbone_height",
+      "lower_face_fullness",
+      "nasal_projection",
+      "chin_projection",
+      "lip_projection",
+      "orbital_depth",
+      "forehead_slope",
+      "sym_eyes",
+      "sym_brows",
+      "sym_nose",
+      "dimorphism",
+      "shape_pc1",
+      "shape_pc2",
+      "shape_pc3",
+      "shape_pc5",
+      "shape_pc6",
+      "shape_pc7",
+      "shape_pc8",
+      "shape_pc9",
+      "shape_pc10",
+      "shape_pc11",
+      "shape_pc12",
+      "skin_lum",
+      "skin_texture",
+      "skin_redness",
+      "skin_yellow",
+      "under_eye",
+      "lip_redness",
+      "eye_contrast",
+      "sclera_bright",
+      "brow_contrast",
+      "lash_line",
+      "iris_lightness",
+      "iris_blue",
+      "hair_darkness",
+      "hair_texture",
+      "facial_hair",
+      "jaw_definition",
+      "cheek_hollow",
+      "neck_width",
+      "bs_browDownLeft",
+      "bs_browDownRight",
+      "bs_browInnerUp",
+      "bs_browOuterUpLeft",
+      "bs_browOuterUpRight",
+      "bs_cheekSquintLeft",
+      "bs_cheekSquintRight",
+      "bs_eyeBlinkRight",
+      "bs_eyeLookInLeft",
+      "bs_eyeLookInRight",
+      "bs_eyeLookOutLeft",
+      "bs_eyeLookOutRight",
+      "bs_eyeLookUpLeft",
+      "bs_eyeLookUpRight",
+      "bs_eyeSquintLeft",
+      "bs_eyeSquintRight",
+      "bs_eyeWideLeft",
+      "bs_eyeWideRight",
+      "bs_jawLeft",
+      "bs_jawOpen",
+      "bs_jawRight",
+      "bs_mouthClose",
+      "bs_mouthDimpleLeft",
+      "bs_mouthDimpleRight",
+      "bs_mouthFrownLeft",
+      "bs_mouthFrownRight",
+      "bs_mouthPressLeft",
+      "bs_mouthPressRight",
+      "bs_mouthRight",
+      "bs_mouthRollLower",
+      "bs_mouthRollUpper",
+      "bs_mouthShrugLower",
+      "bs_mouthShrugUpper",
+      "bs_mouthSmileLeft",
+      "bs_mouthSmileRight",
+      "bs_mouthStretchLeft",
+      "bs_mouthStretchRight",
+      "bs_noseSneerRight"
     ],
     "metric_corr": {
       "canthal_tilt": -0.01380940071351975,
+      "canthal_asym": -0.013460888515270109,
       "eye_spacing": 0.1386631730037673,
+      "intercanthal_eye": -0.3871161936894696,
+      "eye_width": 0.41127663747271026,
+      "eye_aspect": 0.3673283495540447,
+      "iris_fill": 0.06890799508326799,
+      "scleral_show": 0.1619331289462818,
+      "upper_scleral": 0.32834232445634043,
+      "brow_eye": -0.22167378398459398,
+      "brow_tilt": 0.047093665595339604,
+      "brow_thickness": 0.16906324960496572,
+      "brow_length": -0.34307745110307863,
+      "brow_gap": 0.26268581045855155,
+      "nose_intercanthal": 0.03779987412464166,
+      "nose_face": -0.1342441348770649,
+      "nose_length": 0.14451201678249712,
+      "nose_bridge": 0.11319946185839191,
+      "nose_tip_width": 0.26090694119390045,
+      "mouth_nose": 0.14110140705389185,
+      "mouth_ipd": -0.016576268667374727,
+      "lip_ratio": 0.010539297022696093,
+      "lip_fullness": -0.07261089048412346,
+      "cupid_bow": -3.455055201652228e-05,
+      "mouth_tilt": 0.02566074861944598,
+      "philtrum_lower": -0.10232768560517307,
+      "chin_philtrum": 0.17953919493774764,
+      "chin_height": 0.21322997800378082,
+      "chin_width": 0.10254581119197576,
+      "jaw_cheek": -0.3169377947324328,
+      "jaw_angle": 0.33718310511118754,
+      "jaw_frame": -0.47216427894070423,
+      "chin_angle": -0.26311795296747614,
+      "ramus": -0.43313314692164046,
       "fwhr": -0.2409030130319586,
       "midface_ratio": 0.1940787792827091,
       "lower_third": -0.08056558748558094,
-      "chin_philtrum": 0.17953919493774764,
-      "nose_intercanthal": 0.03779987412464166,
-      "mouth_nose": 0.14110140705389185,
-      "jaw_cheek": -0.3169377947324328,
-      "lip_ratio": 0.010539297022696093,
-      "eye_aspect": 0.3673283495540447,
-      "brow_eye": -0.22167378398459398,
+      "upper_third": 0.33959781975817155,
       "face_lw": 0.41486337551944447,
+      "temple_cheek": 0.3126719255776633,
+      "cheekbone_height": -0.17280988077034248,
+      "lower_face_fullness": -0.3454522125451756,
+      "nasal_projection": 0.12072592793496525,
+      "chin_projection": -0.07838204328214221,
+      "lip_projection": -0.12975051703445126,
+      "malar_projection": -0.11121949372845283,
+      "orbital_depth": 0.3598470219211905,
+      "forehead_slope": -0.18642952287084547,
+      "facial_convexity": 0.0808861412518915,
+      "face_depth": 0.17415369163140793,
+      "orbital_vector": 0.30549769449410874,
+      "midface_projection": -0.19370494540107314,
       "symmetry": 0.18553829996580368,
-      "jaw_angle": 0.33718310511118754
+      "sym_eyes": 0.15171525096402425,
+      "sym_brows": 0.15433198062325854,
+      "sym_nose": 0.12499070861635321,
+      "sym_mouth": 0.045963967396600046,
+      "sym_jaw": 0.17203216834689977,
+      "averageness": -0.020607412782291893,
+      "dimorphism": -0.07019097580312036,
+      "shape_pc1": 0.04946636515966037,
+      "shape_pc2": 0.33159148072876865,
+      "shape_pc3": -0.13383824667276786,
+      "shape_pc4": 0.32686255017459165,
+      "shape_pc5": 0.13577349783003298,
+      "shape_pc6": 0.12773599932013643,
+      "shape_pc7": -0.2647997819479168,
+      "shape_pc8": -0.19834957802238018,
+      "shape_pc9": -0.19053483172386443,
+      "shape_pc10": -0.21706542380095528,
+      "shape_pc11": 0.0863307085899796,
+      "shape_pc12": 0.10945334038566622,
+      "skin_lum": 0.06649312924448351,
+      "skin_tone_var": 0.21604222354683966,
+      "skin_texture": -0.06073756871185776,
+      "skin_redness": -0.15464906152573688,
+      "skin_yellow": 0.031268817050486154,
+      "under_eye": -0.04488546160179325,
+      "lip_contrast": 0.0488867122930222,
+      "lip_redness": 0.06545927864148547,
+      "eye_contrast": 0.3295213129290845,
+      "sclera_bright": -0.13117465481244073,
+      "brow_contrast": -0.002226504249100739,
+      "lash_line": -0.40604742809665423,
+      "iris_lightness": -0.2622504666427028,
+      "iris_blue": 0.08116101232436343,
+      "hair_darkness": 0.11040953354789611,
+      "hair_texture": 0.13666771363109625,
+      "facial_hair": -0.01600031866383681,
+      "jaw_definition": 0.23655803840923734,
+      "cheek_hollow": -0.0865057274511152,
+      "neck_width": -0.13407315416871238,
+      "bs_browDownLeft": 0.12317569754258054,
+      "bs_browDownRight": 0.1317594662172456,
+      "bs_browInnerUp": -0.253767788349815,
+      "bs_browOuterUpLeft": -0.15821660909024132,
+      "bs_browOuterUpRight": -0.1466045917444308,
+      "bs_cheekPuff": -0.01087811989878949,
+      "bs_cheekSquintLeft": 0.0745655257361785,
+      "bs_cheekSquintRight": 0.06948250818514443,
+      "bs_eyeBlinkLeft": -0.31786016810545636,
+      "bs_eyeBlinkRight": -0.30762877810020006,
+      "bs_eyeLookDownLeft": -0.40540578596891447,
+      "bs_eyeLookDownRight": -0.4254386055802388,
+      "bs_eyeLookInLeft": 0.06901100646517555,
+      "bs_eyeLookInRight": 0.08052057843268912,
+      "bs_eyeLookOutLeft": 0.11845276557966417,
+      "bs_eyeLookOutRight": 0.143033735751059,
+      "bs_eyeLookUpLeft": 0.4428073409294504,
+      "bs_eyeLookUpRight": 0.4302247894026263,
+      "bs_eyeSquintLeft": 0.16305285625746874,
+      "bs_eyeSquintRight": 0.08909250561195856,
+      "bs_eyeWideLeft": 0.07621545294362952,
+      "bs_eyeWideRight": 0.07907769367801015,
+      "bs_jawForward": -0.019929748078915066,
+      "bs_jawLeft": 0.09251418230719152,
+      "bs_jawOpen": 0.004351713139726217,
+      "bs_jawRight": 0.08632187335662328,
+      "bs_mouthClose": 0.07525698397698809,
+      "bs_mouthDimpleLeft": -0.00532064901873836,
+      "bs_mouthDimpleRight": 0.019448390564671077,
+      "bs_mouthFrownLeft": -0.09332646786989929,
+      "bs_mouthFrownRight": -0.09859053369659257,
+      "bs_mouthFunnel": -0.0286972180313073,
+      "bs_mouthLeft": -0.0035851563938678306,
+      "bs_mouthLowerDownLeft": -0.03425751750914421,
+      "bs_mouthLowerDownRight": -0.028476613302879712,
+      "bs_mouthPressLeft": 0.06430766196655115,
+      "bs_mouthPressRight": 0.06571557676555755,
+      "bs_mouthPucker": -0.06036443516824275,
+      "bs_mouthRight": 0.03844617495185497,
+      "bs_mouthRollLower": -0.023129764665621406,
+      "bs_mouthRollUpper": -0.07720874367308672,
+      "bs_mouthShrugLower": -0.07897188374024858,
+      "bs_mouthShrugUpper": -0.10505156941698883,
+      "bs_mouthSmileLeft": 0.0539262768789914,
+      "bs_mouthSmileRight": 0.058786041389406636,
+      "bs_mouthStretchLeft": -0.01511836767239949,
+      "bs_mouthStretchRight": 0.010465909573028532,
+      "bs_mouthUpperUpLeft": -0.013414099570168451,
+      "bs_mouthUpperUpRight": -0.013277900034491634,
+      "bs_noseSneerLeft": -0.25205548494264474,
+      "bs_noseSneerRight": 0.026235478543126124
+    },
+    "weights": {
+      "canthal_tilt": {
+        "lin": -0.05224086042851954,
+        "quad": -0.01808242379051268,
+        "importance": 0.05335566249111106
+      },
+      "canthal_asym": {
+        "lin": -0.01056581278846549,
+        "quad": -0.0,
+        "importance": 0.009382857934854754
+      },
+      "eye_spacing": {
+        "lin": 0.0,
+        "quad": -0.018943416225965598,
+        "importance": 0.027721004081285024
+      },
+      "intercanthal_eye": {
+        "lin": -0.04211589992405145,
+        "quad": -0.012337248616392169,
+        "importance": 0.045887439501048274
+      },
+      "eye_width": {
+        "lin": 0.06315638813979339,
+        "quad": -0.0,
+        "importance": 0.0631369763032652
+      },
+      "eye_aspect": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "iris_fill": {
+        "lin": 0.036021315596383316,
+        "quad": -0.0021810947033877232,
+        "importance": 0.03662595617433863
+      },
+      "scleral_show": {
+        "lin": 0.0,
+        "quad": -0.00068627771853922,
+        "importance": 0.0012852581125642414
+      },
+      "upper_scleral": {
+        "lin": 0.06702983927128664,
+        "quad": -0.0,
+        "importance": 0.06607337468224807
+      },
+      "brow_eye": {
+        "lin": -0.012079599263588455,
+        "quad": -0.006968898302339057,
+        "importance": 0.014793617852331877
+      },
+      "brow_tilt": {
+        "lin": 0.014671748133673293,
+        "quad": -0.012370902658770966,
+        "importance": 0.02268667914426659
+      },
+      "brow_thickness": {
+        "lin": 0.0012355081515000828,
+        "quad": -0.002617731852925047,
+        "importance": 0.00412022572097723
+      },
+      "brow_length": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "brow_gap": {
+        "lin": 0.011722754073118959,
+        "quad": -0.0,
+        "importance": 0.011696626447319886
+      },
+      "nose_intercanthal": {
+        "lin": 0.0,
+        "quad": -0.0005842640357106602,
+        "importance": 0.0009176691199908112
+      },
+      "nose_face": {
+        "lin": -0.05646568665823798,
+        "quad": -0.0033908517812962537,
+        "importance": 0.058710691810279006
+      },
+      "nose_length": {
+        "lin": 0.0008767520922957179,
+        "quad": -0.0,
+        "importance": 0.0008764826125819253
+      },
+      "nose_bridge": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "nose_tip_width": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "mouth_nose": {
+        "lin": 0.04464708976409908,
+        "quad": -0.0,
+        "importance": 0.044633366975658645
+      },
+      "mouth_ipd": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "lip_ratio": {
+        "lin": 0.042885918767219124,
+        "quad": -0.02181777765359322,
+        "importance": 0.03282367496239785
+      },
+      "lip_fullness": {
+        "lin": -0.0,
+        "quad": -0.009184213339034297,
+        "importance": 0.01237642952304047
+      },
+      "cupid_bow": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "mouth_tilt": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "philtrum_lower": {
+        "lin": -0.0,
+        "quad": -0.0033028575692061564,
+        "importance": 0.0050672176771315355
+      },
+      "chin_philtrum": {
+        "lin": 0.019344971914250216,
+        "quad": -0.0,
+        "importance": 0.019189815054325564
+      },
+      "chin_height": {
+        "lin": 0.04621516009517175,
+        "quad": -0.0,
+        "importance": 0.04580684861917184
+      },
+      "chin_width": {
+        "lin": 0.006124508406035271,
+        "quad": -0.001491612110127398,
+        "importance": 0.006110124060460097
+      },
+      "jaw_cheek": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "jaw_angle": {
+        "lin": 0.018522303820025014,
+        "quad": -0.0003698103194573281,
+        "importance": 0.018557147655407093
+      },
+      "jaw_frame": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "chin_angle": {
+        "lin": -0.022117227131541652,
+        "quad": -0.0053525553533000005,
+        "importance": 0.024110059004980925
+      },
+      "ramus": {
+        "lin": -0.00019468909173657575,
+        "quad": -0.004055646394766427,
+        "importance": 0.005818429112190566
+      },
+      "fwhr": {
+        "lin": -0.0017778513116798093,
+        "quad": -0.025779239287224906,
+        "importance": 0.042527891718620675
+      },
+      "midface_ratio": {
+        "lin": 0.013870644117105556,
+        "quad": -0.0037243736188340686,
+        "importance": 0.01513114032191702
+      },
+      "lower_third": {
+        "lin": -0.0105862804128728,
+        "quad": -6.163706761059738e-05,
+        "importance": 0.010603779661822667
+      },
+      "upper_third": {
+        "lin": 0.01679742772232479,
+        "quad": -0.0,
+        "importance": 0.016748336426559415
+      },
+      "face_lw": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "temple_cheek": {
+        "lin": 0.04936461118478545,
+        "quad": -0.0,
+        "importance": 0.04913667235140378
+      },
+      "cheekbone_height": {
+        "lin": -0.0,
+        "quad": -0.00667574323902705,
+        "importance": 0.011437926005400587
+      },
+      "lower_face_fullness": {
+        "lin": -0.026010300495590367,
+        "quad": -0.0,
+        "importance": 0.026002305934331067
+      },
+      "nasal_projection": {
+        "lin": 0.0068889864784188095,
+        "quad": -0.0,
+        "importance": 0.006748105994288578
+      },
+      "chin_projection": {
+        "lin": -0.08526835326387566,
+        "quad": -0.007902254240577857,
+        "importance": 0.09095568610481136
+      },
+      "lip_projection": {
+        "lin": -0.013036265676672234,
+        "quad": -0.008496358576566549,
+        "importance": 0.018150004783285958
+      },
+      "malar_projection": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "orbital_depth": {
+        "lin": 0.0,
+        "quad": -0.008170471302944656,
+        "importance": 0.01778688038883663
+      },
+      "forehead_slope": {
+        "lin": -0.055120243839307956,
+        "quad": -0.0,
+        "importance": 0.05449334382582414
+      },
+      "facial_convexity": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "face_depth": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "orbital_vector": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "midface_projection": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "symmetry": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sym_eyes": {
+        "lin": -0.007746831886606561,
+        "quad": -0.0,
+        "importance": 0.007251522289216714
+      },
+      "sym_brows": {
+        "lin": -0.007941939898400802,
+        "quad": -0.0,
+        "importance": 0.007605296033036455
+      },
+      "sym_nose": {
+        "lin": -0.0,
+        "quad": -0.0017341893995662938,
+        "importance": 0.00319330195559833
+      },
+      "sym_mouth": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sym_jaw": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "averageness": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "dimorphism": {
+        "lin": -0.001891678262981738,
+        "quad": -0.013949107620525085,
+        "importance": 0.023475117691672157
+      },
+      "shape_pc1": {
+        "lin": 0.017515058495789774,
+        "quad": -0.0,
+        "importance": 0.01750967504443823
+      },
+      "shape_pc2": {
+        "lin": 0.0,
+        "quad": -0.009425698980445837,
+        "importance": 0.014937890576628265
+      },
+      "shape_pc3": {
+        "lin": -0.022091719510633684,
+        "quad": -0.0,
+        "importance": 0.02204409969674731
+      },
+      "shape_pc4": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "shape_pc5": {
+        "lin": 0.014749772506875338,
+        "quad": -0.0051318290591923265,
+        "importance": 0.017098362080101338
+      },
+      "shape_pc6": {
+        "lin": 0.0019689853492820685,
+        "quad": -0.0,
+        "importance": 0.0019074216998200648
+      },
+      "shape_pc7": {
+        "lin": -0.013437903146878406,
+        "quad": -0.0,
+        "importance": 0.013433772855343891
+      },
+      "shape_pc8": {
+        "lin": -0.02635712058611428,
+        "quad": -0.00012098518345438563,
+        "importance": 0.026320919870046894
+      },
+      "shape_pc9": {
+        "lin": -0.03719273740199947,
+        "quad": -0.0,
+        "importance": 0.03707718392255262
+      },
+      "shape_pc10": {
+        "lin": -0.053292758325040934,
+        "quad": -0.012349755933666799,
+        "importance": 0.0566338792032581
+      },
+      "shape_pc11": {
+        "lin": 0.05596401051733962,
+        "quad": -0.0,
+        "importance": 0.05592877230869016
+      },
+      "shape_pc12": {
+        "lin": 0.05113077434971861,
+        "quad": -0.0,
+        "importance": 0.05042222515662641
+      },
+      "skin_lum": {
+        "lin": 0.010826915927790101,
+        "quad": -0.0,
+        "importance": 0.010823588152613335
+      },
+      "skin_tone_var": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "skin_texture": {
+        "lin": -0.07494055238181611,
+        "quad": -0.0,
+        "importance": 0.06668819058258438
+      },
+      "skin_redness": {
+        "lin": -0.12960496200003777,
+        "quad": -0.0,
+        "importance": 0.1286326139771775
+      },
+      "skin_yellow": {
+        "lin": 0.0961366737897498,
+        "quad": -0.0,
+        "importance": 0.09446912166016412
+      },
+      "under_eye": {
+        "lin": 0.01806977904655786,
+        "quad": -0.0,
+        "importance": 0.01790210575322113
+      },
+      "lip_contrast": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "lip_redness": {
+        "lin": 0.00016098159169173105,
+        "quad": -0.0,
+        "importance": 0.0001604548486772099
+      },
+      "eye_contrast": {
+        "lin": 0.032311982218089404,
+        "quad": -0.0,
+        "importance": 0.03230205076458614
+      },
+      "sclera_bright": {
+        "lin": 0.0,
+        "quad": -0.012265407288518543,
+        "importance": 0.019793239250247556
+      },
+      "brow_contrast": {
+        "lin": -0.005223083292047719,
+        "quad": -0.0,
+        "importance": 0.003697047232333507
+      },
+      "lash_line": {
+        "lin": -0.10355277891866284,
+        "quad": -0.0,
+        "importance": 0.10352095080010604
+      },
+      "iris_lightness": {
+        "lin": -0.0397372143493405,
+        "quad": -0.0,
+        "importance": 0.03972500066657724
+      },
+      "iris_blue": {
+        "lin": 0.01503920484568405,
+        "quad": -0.0,
+        "importance": 0.014957568751447258
+      },
+      "hair_darkness": {
+        "lin": 0.05228375311520711,
+        "quad": -0.0,
+        "importance": 0.05226768311217178
+      },
+      "hair_texture": {
+        "lin": 0.019377977149037506,
+        "quad": -0.0,
+        "importance": 0.01713787360500604
+      },
+      "facial_hair": {
+        "lin": -0.02769115727659138,
+        "quad": -0.0,
+        "importance": 0.027460099541413915
+      },
+      "jaw_definition": {
+        "lin": 0.03938402185139241,
+        "quad": -0.005096443621931075,
+        "importance": 0.03361128224403489
+      },
+      "cheek_hollow": {
+        "lin": -0.0029317942082620592,
+        "quad": -0.0,
+        "importance": 0.00261305918539696
+      },
+      "neck_width": {
+        "lin": -0.0,
+        "quad": -0.004158721499867214,
+        "importance": 0.005045235759325969
+      },
+      "bs_browDownLeft": {
+        "lin": 0.013550200168053287,
+        "quad": -0.0,
+        "importance": 0.01354603536070223
+      },
+      "bs_browDownRight": {
+        "lin": 0.024508355410410333,
+        "quad": -0.018927034982760375,
+        "importance": 0.022084748326641996
+      },
+      "bs_browInnerUp": {
+        "lin": -0.00023547084467399535,
+        "quad": -0.0,
+        "importance": 0.0002321087410801273
+      },
+      "bs_browOuterUpLeft": {
+        "lin": -0.0,
+        "quad": -0.0054070635969520565,
+        "importance": 0.012496146361074705
+      },
+      "bs_browOuterUpRight": {
+        "lin": -0.0,
+        "quad": -0.005641039166149377,
+        "importance": 0.012680920468844037
+      },
+      "bs_cheekPuff": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_cheekSquintLeft": {
+        "lin": 0.041714794784299486,
+        "quad": -0.0,
+        "importance": 0.036016998869944715
+      },
+      "bs_cheekSquintRight": {
+        "lin": 0.006008510095126799,
+        "quad": -0.0,
+        "importance": 0.005013857847721222
+      },
+      "bs_eyeBlinkLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeBlinkRight": {
+        "lin": -0.010736789382527211,
+        "quad": -0.0,
+        "importance": 0.010544948737275872
+      },
+      "bs_eyeLookDownLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeLookDownRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeLookInLeft": {
+        "lin": 0.006735049752222977,
+        "quad": -0.00043189439401184317,
+        "importance": 0.005053319808828737
+      },
+      "bs_eyeLookInRight": {
+        "lin": 0.01879696614433153,
+        "quad": -0.0,
+        "importance": 0.01808188584703592
+      },
+      "bs_eyeLookOutLeft": {
+        "lin": 0.029769612895445656,
+        "quad": -0.003985452212505664,
+        "importance": 0.02254442513459351
+      },
+      "bs_eyeLookOutRight": {
+        "lin": 0.03589456592922929,
+        "quad": -0.011597515391963827,
+        "importance": 0.014863629693656953
+      },
+      "bs_eyeLookUpLeft": {
+        "lin": 0.025017286662377555,
+        "quad": -0.0,
+        "importance": 0.024968410663765192
+      },
+      "bs_eyeLookUpRight": {
+        "lin": 0.007738569435059314,
+        "quad": -0.0,
+        "importance": 0.0077231985137948935
+      },
+      "bs_eyeSquintLeft": {
+        "lin": 0.02692820567966524,
+        "quad": -0.0,
+        "importance": 0.026919928990870312
+      },
+      "bs_eyeSquintRight": {
+        "lin": 0.05293820189227204,
+        "quad": -0.0017006840319655164,
+        "importance": 0.05284195343077468
+      },
+      "bs_eyeWideLeft": {
+        "lin": 0.0,
+        "quad": -0.011775388506664418,
+        "importance": 0.0226578763377078
+      },
+      "bs_eyeWideRight": {
+        "lin": 0.005263144761100745,
+        "quad": -0.0,
+        "importance": 0.004301386770636952
+      },
+      "bs_jawForward": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_jawLeft": {
+        "lin": 0.039615280041574545,
+        "quad": -0.0,
+        "importance": 0.026517503840971367
+      },
+      "bs_jawOpen": {
+        "lin": 2.8649184020703728e-05,
+        "quad": -0.008423538928977911,
+        "importance": 0.02060907761371207
+      },
+      "bs_jawRight": {
+        "lin": 0.0,
+        "quad": -0.0003623395497234994,
+        "importance": 0.0007668327817931227
+      },
+      "bs_mouthClose": {
+        "lin": 0.0,
+        "quad": -0.0008537745330767842,
+        "importance": 0.0011441760410074026
+      },
+      "bs_mouthDimpleLeft": {
+        "lin": -0.01747198332189762,
+        "quad": -0.0,
+        "importance": 0.013239075908359951
+      },
+      "bs_mouthDimpleRight": {
+        "lin": 0.0,
+        "quad": -0.0024838546913084456,
+        "importance": 0.0058576118752743786
+      },
+      "bs_mouthFrownLeft": {
+        "lin": -0.003401362989387082,
+        "quad": -0.013032786822980187,
+        "importance": 0.02358819143002173
+      },
+      "bs_mouthFrownRight": {
+        "lin": -0.0,
+        "quad": -0.004318866547543121,
+        "importance": 0.007440275364555933
+      },
+      "bs_mouthFunnel": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthLowerDownLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthLowerDownRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthPressLeft": {
+        "lin": 0.02378828289643074,
+        "quad": -0.0,
+        "importance": 0.022749152796396197
+      },
+      "bs_mouthPressRight": {
+        "lin": 0.04479346916107669,
+        "quad": -0.005280614671058315,
+        "importance": 0.03342499544707845
+      },
+      "bs_mouthPucker": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthRight": {
+        "lin": 0.004366858461320121,
+        "quad": -0.004576774747409565,
+        "importance": 0.004408260975880663
+      },
+      "bs_mouthRollLower": {
+        "lin": -3.252255543971972e-05,
+        "quad": -0.010980048748322802,
+        "importance": 0.02219011088451729
+      },
+      "bs_mouthRollUpper": {
+        "lin": -0.014991573282730129,
+        "quad": -0.0,
+        "importance": 0.012261383855099712
+      },
+      "bs_mouthShrugLower": {
+        "lin": -0.024114691848620678,
+        "quad": -0.00010906082533811326,
+        "importance": 0.020177208545138815
+      },
+      "bs_mouthShrugUpper": {
+        "lin": -0.040459804017158985,
+        "quad": -0.0,
+        "importance": 0.02946391139171628
+      },
+      "bs_mouthSmileLeft": {
+        "lin": 0.022848148310072824,
+        "quad": -0.0,
+        "importance": 0.022841125673191635
+      },
+      "bs_mouthSmileRight": {
+        "lin": 0.024221007264625435,
+        "quad": -0.00020649282881821324,
+        "importance": 0.02387881676321991
+      },
+      "bs_mouthStretchLeft": {
+        "lin": -0.03486564875663676,
+        "quad": -0.0,
+        "importance": 0.024361433670571232
+      },
+      "bs_mouthStretchRight": {
+        "lin": 0.004430680559440234,
+        "quad": -0.0,
+        "importance": 0.003546626120231938
+      },
+      "bs_mouthUpperUpLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthUpperUpRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_noseSneerLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_noseSneerRight": {
+        "lin": 0.0,
+        "quad": -0.004276608803269326,
+        "importance": 0.010770810593893634
+      }
+    },
+    "group_importance": {
+      "eyes": 0.12451528856669894,
+      "brows": 0.029787981972528424,
+      "nose": 0.05872440439225847,
+      "mouth": 0.056994594378302066,
+      "jaw": 0.058850376293911565,
+      "proportions": 0.07517897666650394,
+      "depth": 0.10924190623669425,
+      "symmetry": 0.010982817518321742,
+      "shape": 0.11396729486723634,
+      "skin": 0.17422891419026998,
+      "colouring": 0.11818324967220954,
+      "hair": 0.06147905721820993,
+      "leanness": 0.034088132484220136,
+      "expression": 0.12479057269887117
     }
   },
   "F_free": {
-    "pearson": 0.6928560206800836,
-    "mae": 0.4071924524216727,
-    "rmse": 0.5118374771654336
+    "pearson": 0.8248821821786191,
+    "mae": 0.3080162109188799,
+    "rmse": 0.40107936582107623
   },
   "F": {
-    "pearson": 0.6512486604617951,
-    "mae": 0.4251671788388242,
-    "rmse": 0.5383281991530957,
-    "alpha": 62.10169418915616,
+    "pearson": 0.8080226118748599,
+    "mae": 0.3237399957088129,
+    "rmse": 0.41790588528922734,
+    "prior_conflicts": [
+      "canthal_asym",
+      "nose_tip_width",
+      "symmetry",
+      "sym_eyes",
+      "sym_brows",
+      "sym_nose",
+      "sym_mouth",
+      "sym_jaw",
+      "skin_tone_var",
+      "sclera_bright"
+    ],
+    "alpha": 67.0018750350959,
     "active_metrics": [
       "canthal_tilt",
+      "canthal_asym",
       "eye_spacing",
+      "intercanthal_eye",
+      "eye_width",
+      "iris_fill",
+      "upper_scleral",
+      "brow_eye",
+      "brow_length",
+      "brow_gap",
+      "nose_intercanthal",
+      "nose_face",
+      "mouth_nose",
+      "lip_ratio",
+      "lip_fullness",
+      "cupid_bow",
+      "mouth_tilt",
+      "philtrum_lower",
+      "chin_philtrum",
+      "chin_height",
+      "chin_width",
+      "jaw_angle",
+      "chin_angle",
+      "ramus",
       "fwhr",
       "midface_ratio",
       "lower_third",
-      "chin_philtrum",
-      "nose_intercanthal",
-      "mouth_nose",
-      "jaw_cheek",
-      "lip_ratio",
-      "eye_aspect",
-      "brow_eye",
+      "upper_third",
       "face_lw",
-      "symmetry",
-      "jaw_angle"
+      "temple_cheek",
+      "lower_face_fullness",
+      "nasal_projection",
+      "chin_projection",
+      "lip_projection",
+      "malar_projection",
+      "forehead_slope",
+      "facial_convexity",
+      "sym_brows",
+      "dimorphism",
+      "shape_pc2",
+      "shape_pc3",
+      "shape_pc5",
+      "shape_pc6",
+      "shape_pc7",
+      "shape_pc8",
+      "shape_pc9",
+      "shape_pc10",
+      "shape_pc11",
+      "skin_lum",
+      "skin_texture",
+      "skin_redness",
+      "under_eye",
+      "lip_redness",
+      "brow_contrast",
+      "lash_line",
+      "iris_lightness",
+      "iris_blue",
+      "hair_darkness",
+      "facial_hair",
+      "jaw_definition",
+      "cheek_hollow",
+      "neck_width",
+      "bs_browDownLeft",
+      "bs_browOuterUpRight",
+      "bs_cheekPuff",
+      "bs_cheekSquintLeft",
+      "bs_eyeLookDownLeft",
+      "bs_eyeLookInLeft",
+      "bs_eyeLookInRight",
+      "bs_eyeLookOutLeft",
+      "bs_eyeLookOutRight",
+      "bs_eyeWideLeft",
+      "bs_eyeWideRight",
+      "bs_jawLeft",
+      "bs_jawRight",
+      "bs_mouthClose",
+      "bs_mouthDimpleLeft",
+      "bs_mouthDimpleRight",
+      "bs_mouthFrownRight",
+      "bs_mouthFunnel",
+      "bs_mouthLeft",
+      "bs_mouthLowerDownLeft",
+      "bs_mouthPressLeft",
+      "bs_mouthRight",
+      "bs_mouthShrugLower",
+      "bs_mouthSmileRight",
+      "bs_noseSneerLeft",
+      "bs_noseSneerRight"
     ],
     "metric_corr": {
       "canthal_tilt": 0.01606253802914715,
+      "canthal_asym": 0.08032890171214074,
       "eye_spacing": 0.24094796706002417,
+      "intercanthal_eye": -0.3121494271891344,
+      "eye_width": 0.4428863138529574,
+      "eye_aspect": 0.3642397981517754,
+      "iris_fill": 0.07302260424917105,
+      "scleral_show": 0.01251841250955685,
+      "upper_scleral": 0.41911067305245486,
+      "brow_eye": 0.047190986993223924,
+      "brow_tilt": -0.0729754446708579,
+      "brow_thickness": 0.28658537022061537,
+      "brow_length": -0.2981454428749959,
+      "brow_gap": 0.25654785019890125,
+      "nose_intercanthal": -0.10198113946285566,
+      "nose_face": -0.08988530947951207,
+      "nose_length": 0.2075608011207954,
+      "nose_bridge": 0.27413104886667083,
+      "nose_tip_width": 0.15577507213902514,
+      "mouth_nose": 0.10593966641464482,
+      "mouth_ipd": -0.056199528206948665,
+      "lip_ratio": -0.11608134622990667,
+      "lip_fullness": 0.15938477185945088,
+      "cupid_bow": -0.1938528346392835,
+      "mouth_tilt": 0.01884702026541782,
+      "philtrum_lower": -0.1870719745040061,
+      "chin_philtrum": 0.2010122825724662,
+      "chin_height": 0.11513720244053635,
+      "chin_width": -0.11344216801715809,
+      "jaw_cheek": -0.4340293424298584,
+      "jaw_angle": 0.38092815053020845,
+      "jaw_frame": -0.5409642161025394,
+      "chin_angle": -0.18787943393862697,
+      "ramus": -0.4784019780630342,
       "fwhr": -0.272100993336041,
       "midface_ratio": -0.03059243535828564,
       "lower_third": -0.18266613131458634,
-      "chin_philtrum": 0.2010122825724662,
-      "nose_intercanthal": -0.10198113946285566,
-      "mouth_nose": 0.10593966641464482,
-      "jaw_cheek": -0.4340293424298584,
-      "lip_ratio": -0.11608134622990667,
-      "eye_aspect": 0.3642397981517754,
-      "brow_eye": 0.047190986993223924,
+      "upper_third": 0.38494513832416943,
       "face_lw": 0.44499244849314273,
+      "temple_cheek": 0.42888266969327643,
+      "cheekbone_height": -0.12480702895112067,
+      "lower_face_fullness": -0.4547345262249659,
+      "nasal_projection": 0.007787694892512816,
+      "chin_projection": -0.21886143735142877,
+      "lip_projection": 0.04312351383951127,
+      "malar_projection": -0.1071169069580949,
+      "orbital_depth": 0.31994845745864026,
+      "forehead_slope": -0.29760363965675846,
+      "facial_convexity": -0.09930543682658075,
+      "face_depth": 0.30255112140225643,
+      "orbital_vector": 0.2933907668762272,
+      "midface_projection": -0.12462907319642294,
       "symmetry": 0.1098750574445775,
-      "jaw_angle": 0.38092815053020845
+      "sym_eyes": 0.07572200152472325,
+      "sym_brows": 0.10126842384920497,
+      "sym_nose": 0.09078621977086318,
+      "sym_mouth": 0.07344730814787315,
+      "sym_jaw": 0.10132659204079936,
+      "averageness": -0.005965094377991609,
+      "dimorphism": -0.2568015007142536,
+      "shape_pc1": 0.06709479531149587,
+      "shape_pc2": 0.3285457219994907,
+      "shape_pc3": -0.39188533713146345,
+      "shape_pc4": 0.3505015414232212,
+      "shape_pc5": 0.04244447773365885,
+      "shape_pc6": 0.09280166388189663,
+      "shape_pc7": -0.12139202900994761,
+      "shape_pc8": -0.027184314552223962,
+      "shape_pc9": -0.11934394077075929,
+      "shape_pc10": -0.2048315264141131,
+      "shape_pc11": 0.22647324782835188,
+      "shape_pc12": -0.08455233075223623,
+      "skin_lum": 0.2860995699309534,
+      "skin_tone_var": 0.02744444192593226,
+      "skin_texture": -0.07383972078949798,
+      "skin_redness": -0.20162672495139444,
+      "skin_yellow": -0.053396025917239326,
+      "under_eye": 0.05695679348798849,
+      "lip_contrast": 0.014438021421890879,
+      "lip_redness": 0.11563667531884013,
+      "eye_contrast": 0.09152268979563954,
+      "sclera_bright": -0.08502876734443884,
+      "brow_contrast": -0.004267003873443542,
+      "lash_line": -0.45850122511195474,
+      "iris_lightness": 0.023785307664389452,
+      "iris_blue": 0.10059027378492946,
+      "hair_darkness": -0.07416555134241659,
+      "hair_texture": -0.014616509045983694,
+      "facial_hair": -0.10705165721600048,
+      "jaw_definition": 0.20000389958013354,
+      "cheek_hollow": 0.09173316427611064,
+      "neck_width": -0.06173033027784108,
+      "bs_browDownLeft": -0.05925649772931961,
+      "bs_browDownRight": -0.04840524855958154,
+      "bs_browInnerUp": -0.08065729062076929,
+      "bs_browOuterUpLeft": 0.04888691212363931,
+      "bs_browOuterUpRight": 0.028514996599539225,
+      "bs_cheekPuff": -0.1297844514693713,
+      "bs_cheekSquintLeft": 0.07356087452454006,
+      "bs_cheekSquintRight": -0.05741251813243976,
+      "bs_eyeBlinkLeft": -0.3324458487041462,
+      "bs_eyeBlinkRight": -0.25826151284350074,
+      "bs_eyeLookDownLeft": -0.3417119725772765,
+      "bs_eyeLookDownRight": -0.35076795660705656,
+      "bs_eyeLookInLeft": 0.03217885534092764,
+      "bs_eyeLookInRight": 0.0735407830949347,
+      "bs_eyeLookOutLeft": 0.08151524467990914,
+      "bs_eyeLookOutRight": 0.06380065669888325,
+      "bs_eyeLookUpLeft": 0.30842150397544976,
+      "bs_eyeLookUpRight": 0.3091053710620849,
+      "bs_eyeSquintLeft": -0.09233427616840988,
+      "bs_eyeSquintRight": -0.15146965087104425,
+      "bs_eyeWideLeft": 0.1332901732088531,
+      "bs_eyeWideRight": 0.11361758587317947,
+      "bs_jawForward": -0.13938066153965795,
+      "bs_jawLeft": -0.05217998406366721,
+      "bs_jawOpen": 0.0007823905174992605,
+      "bs_jawRight": -0.004977108117036904,
+      "bs_mouthClose": 0.013493155509540465,
+      "bs_mouthDimpleLeft": -0.1033293020075513,
+      "bs_mouthDimpleRight": -0.07256230264764199,
+      "bs_mouthFrownLeft": -0.12214282760743375,
+      "bs_mouthFrownRight": -0.13491690651718558,
+      "bs_mouthFunnel": 0.10713411588312877,
+      "bs_mouthLeft": 0.009880966049743086,
+      "bs_mouthLowerDownLeft": -0.15038736403649552,
+      "bs_mouthLowerDownRight": -0.15697797137211,
+      "bs_mouthPressLeft": -0.16722426125189305,
+      "bs_mouthPressRight": -0.11751932449444151,
+      "bs_mouthPucker": -0.02280421860729035,
+      "bs_mouthRight": 0.07652102226763799,
+      "bs_mouthRollLower": -0.08226849920370033,
+      "bs_mouthRollUpper": -0.16163621121736205,
+      "bs_mouthShrugLower": -0.11758071108974182,
+      "bs_mouthShrugUpper": 0.10665062295297545,
+      "bs_mouthSmileLeft": 0.06514857748274526,
+      "bs_mouthSmileRight": 0.08084567240136394,
+      "bs_mouthStretchLeft": -0.0771634033653244,
+      "bs_mouthStretchRight": -0.06500900061246301,
+      "bs_mouthUpperUpLeft": -0.07078471721775714,
+      "bs_mouthUpperUpRight": -0.06983815473156688,
+      "bs_noseSneerLeft": -0.1293394708359702,
+      "bs_noseSneerRight": -0.07349922524825708
+    },
+    "weights": {
+      "canthal_tilt": {
+        "lin": 0.0,
+        "quad": -0.004134509899935654,
+        "importance": 0.006019055739376223
+      },
+      "canthal_asym": {
+        "lin": -0.0,
+        "quad": -0.0022631321722721863,
+        "importance": 0.0048256557152956065
+      },
+      "eye_spacing": {
+        "lin": 0.0,
+        "quad": -0.008425070603062896,
+        "importance": 0.01217648066534247
+      },
+      "intercanthal_eye": {
+        "lin": -0.07750194138415045,
+        "quad": -0.017304268797918416,
+        "importance": 0.0823927970892152
+      },
+      "eye_width": {
+        "lin": 0.10258144024080679,
+        "quad": -0.0,
+        "importance": 0.10255077771745764
+      },
+      "eye_aspect": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "iris_fill": {
+        "lin": 0.0802855419592932,
+        "quad": -0.0,
+        "importance": 0.07923152528068421
+      },
+      "scleral_show": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "upper_scleral": {
+        "lin": 0.04561723145877066,
+        "quad": -0.001206594113796654,
+        "importance": 0.04403629327611879
+      },
+      "brow_eye": {
+        "lin": 0.0,
+        "quad": -0.013267658494663975,
+        "importance": 0.019001559783129517
+      },
+      "brow_tilt": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "brow_thickness": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "brow_length": {
+        "lin": -0.015913413749213054,
+        "quad": -0.0,
+        "importance": 0.015908657086584677
+      },
+      "brow_gap": {
+        "lin": 0.011244088540557468,
+        "quad": -0.0,
+        "importance": 0.011240727581188947
+      },
+      "nose_intercanthal": {
+        "lin": -0.07675747558586124,
+        "quad": -0.029531919187388435,
+        "importance": 0.1037537342797846
+      },
+      "nose_face": {
+        "lin": -0.09168717136720168,
+        "quad": -0.0,
+        "importance": 0.09165976524258193
+      },
+      "nose_length": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "nose_bridge": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "nose_tip_width": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "mouth_nose": {
+        "lin": 0.0903609964270796,
+        "quad": -0.0034053726171473313,
+        "importance": 0.08922261355002131
+      },
+      "mouth_ipd": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "lip_ratio": {
+        "lin": -0.008012435149154423,
+        "quad": -0.007771390334513208,
+        "importance": 0.021880229378744624
+      },
+      "lip_fullness": {
+        "lin": 0.002452414693697082,
+        "quad": -0.013764730844318613,
+        "importance": 0.019316706391187127
+      },
+      "cupid_bow": {
+        "lin": -0.01318732302349105,
+        "quad": -0.0,
+        "importance": 0.012850705058452766
+      },
+      "mouth_tilt": {
+        "lin": 0.012481561271213778,
+        "quad": -0.0,
+        "importance": 0.01247783042007053
+      },
+      "philtrum_lower": {
+        "lin": -0.030728974256188698,
+        "quad": -0.01143596445614172,
+        "importance": 0.03327998263112463
+      },
+      "chin_philtrum": {
+        "lin": 0.03969551009189389,
+        "quad": -0.0,
+        "importance": 0.03925397243359672
+      },
+      "chin_height": {
+        "lin": 0.04618928757212671,
+        "quad": -0.013240988703451638,
+        "importance": 0.051719559994704234
+      },
+      "chin_width": {
+        "lin": -0.0006462820992156162,
+        "quad": -0.011475214325192228,
+        "importance": 0.018123070530484526
+      },
+      "jaw_cheek": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "jaw_angle": {
+        "lin": 0.030810757899278552,
+        "quad": -0.0,
+        "importance": 0.030798730714194745
+      },
+      "jaw_frame": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "chin_angle": {
+        "lin": -0.04516814614762103,
+        "quad": -0.008558312787396515,
+        "importance": 0.046153641327148505
+      },
+      "ramus": {
+        "lin": -0.017389046198195954,
+        "quad": -0.02809892405794902,
+        "importance": 0.04484540702717933
+      },
+      "fwhr": {
+        "lin": -0.0,
+        "quad": -0.009711892721538844,
+        "importance": 0.015860989251819675
+      },
+      "midface_ratio": {
+        "lin": -0.042778774834631626,
+        "quad": -0.02028580083833814,
+        "importance": 0.05370502318547122
+      },
+      "lower_third": {
+        "lin": -1.4521121871978653e-05,
+        "quad": -0.01010939188526481,
+        "importance": 0.016079033019242833
+      },
+      "upper_third": {
+        "lin": 0.05004340592514652,
+        "quad": -0.0,
+        "importance": 0.050028447497389064
+      },
+      "face_lw": {
+        "lin": 0.00010201901061130986,
+        "quad": -0.0,
+        "importance": 0.00010198851621036189
+      },
+      "temple_cheek": {
+        "lin": 0.008883990217362553,
+        "quad": -0.0,
+        "importance": 0.008881334712564339
+      },
+      "cheekbone_height": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "lower_face_fullness": {
+        "lin": -0.02887167655101556,
+        "quad": -0.0,
+        "importance": 0.028863046546185083
+      },
+      "nasal_projection": {
+        "lin": 0.030850767465771436,
+        "quad": -0.0,
+        "importance": 0.03074711690316239
+      },
+      "chin_projection": {
+        "lin": -0.08146798962299977,
+        "quad": -0.008525395586807876,
+        "importance": 0.08730466589769445
+      },
+      "lip_projection": {
+        "lin": 0.013097927473463633,
+        "quad": -0.009398789974521492,
+        "importance": 0.018459984374980844
+      },
+      "malar_projection": {
+        "lin": -0.024281982294252998,
+        "quad": -0.0,
+        "importance": 0.024220771791640408
+      },
+      "orbital_depth": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "forehead_slope": {
+        "lin": -0.015942297718779613,
+        "quad": -0.0,
+        "importance": 0.015891917441523847
+      },
+      "facial_convexity": {
+        "lin": -0.0033598807418452623,
+        "quad": -0.01483764266652004,
+        "importance": 0.02539104780336208
+      },
+      "face_depth": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "orbital_vector": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "midface_projection": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "symmetry": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sym_eyes": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sym_brows": {
+        "lin": -0.018021972682417252,
+        "quad": -0.0019020268426962934,
+        "importance": 0.020453172447890775
+      },
+      "sym_nose": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sym_mouth": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sym_jaw": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "averageness": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "dimorphism": {
+        "lin": -0.01631755534280691,
+        "quad": -0.0,
+        "importance": 0.016312677878797092
+      },
+      "shape_pc1": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "shape_pc2": {
+        "lin": 0.0,
+        "quad": -0.03245885646433813,
+        "importance": 0.05138293493514048
+      },
+      "shape_pc3": {
+        "lin": -0.009679261529632962,
+        "quad": -0.0,
+        "importance": 0.00966199139768746
+      },
+      "shape_pc4": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "shape_pc5": {
+        "lin": 0.00029815267262657617,
+        "quad": -0.0,
+        "importance": 0.0002980635521123635
+      },
+      "shape_pc6": {
+        "lin": 0.019521384021163053,
+        "quad": -0.0,
+        "importance": 0.01939630684596803
+      },
+      "shape_pc7": {
+        "lin": -0.042461134336819334,
+        "quad": -0.015265298992338869,
+        "importance": 0.0451006458575656
+      },
+      "shape_pc8": {
+        "lin": -0.025485149185460933,
+        "quad": -0.013452055770096378,
+        "importance": 0.029536572403347474
+      },
+      "shape_pc9": {
+        "lin": -0.04011486511946049,
+        "quad": -0.0,
+        "importance": 0.04005247122398664
+      },
+      "shape_pc10": {
+        "lin": -0.0509474048255894,
+        "quad": -0.0,
+        "importance": 0.050880246539375236
+      },
+      "shape_pc11": {
+        "lin": 0.04101646834090386,
+        "quad": -0.0,
+        "importance": 0.04100420814978185
+      },
+      "shape_pc12": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "skin_lum": {
+        "lin": 0.025778240616490325,
+        "quad": -0.0006625963020164464,
+        "importance": 0.026134431009306406
+      },
+      "skin_tone_var": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "skin_texture": {
+        "lin": -0.06808413508258254,
+        "quad": -0.0,
+        "importance": 0.05912293036367329
+      },
+      "skin_redness": {
+        "lin": -0.038925622561546476,
+        "quad": -0.0,
+        "importance": 0.03856656612500784
+      },
+      "skin_yellow": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "under_eye": {
+        "lin": 0.036018574002742235,
+        "quad": -0.0,
+        "importance": 0.03472072900518309
+      },
+      "lip_contrast": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "lip_redness": {
+        "lin": 0.053509431700659575,
+        "quad": -0.011175471579806764,
+        "importance": 0.04195178427644075
+      },
+      "eye_contrast": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "sclera_bright": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "brow_contrast": {
+        "lin": -0.07548622536735868,
+        "quad": -0.0,
+        "importance": 0.033534561482236505
+      },
+      "lash_line": {
+        "lin": -0.16940981353023826,
+        "quad": -0.0,
+        "importance": 0.169359175412871
+      },
+      "iris_lightness": {
+        "lin": 0.07677224658319814,
+        "quad": -0.006901590402352508,
+        "importance": 0.07341854725829122
+      },
+      "iris_blue": {
+        "lin": 0.0,
+        "quad": -0.005513533336868491,
+        "importance": 0.009319888607796346
+      },
+      "hair_darkness": {
+        "lin": -0.018282166330068968,
+        "quad": -0.0,
+        "importance": 0.01827670162615985
+      },
+      "hair_texture": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "facial_hair": {
+        "lin": -0.05333035975582466,
+        "quad": -0.0,
+        "importance": 0.051407188807094016
+      },
+      "jaw_definition": {
+        "lin": 0.058761230628039125,
+        "quad": -0.007882965494340886,
+        "importance": 0.053895110795741795
+      },
+      "cheek_hollow": {
+        "lin": 0.02986724011921224,
+        "quad": -0.0,
+        "importance": 0.022518910248878594
+      },
+      "neck_width": {
+        "lin": -0.003140941656931712,
+        "quad": -0.0,
+        "importance": 0.00313650373009752
+      },
+      "bs_browDownLeft": {
+        "lin": -0.0,
+        "quad": -0.00035173528969923833,
+        "importance": 0.0009267168380269327
+      },
+      "bs_browDownRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_browInnerUp": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_browOuterUpLeft": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_browOuterUpRight": {
+        "lin": 0.009155598483969228,
+        "quad": -0.0,
+        "importance": 0.00886251222462728
+      },
+      "bs_cheekPuff": {
+        "lin": -0.011209507822001506,
+        "quad": -0.0,
+        "importance": 0.011004920093824649
+      },
+      "bs_cheekSquintLeft": {
+        "lin": 0.050810854556665674,
+        "quad": -0.0,
+        "importance": 0.04957563071477011
+      },
+      "bs_cheekSquintRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeBlinkLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeBlinkRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeLookDownLeft": {
+        "lin": -0.0,
+        "quad": -0.008064175242555508,
+        "importance": 0.017216131829554865
+      },
+      "bs_eyeLookDownRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeLookInLeft": {
+        "lin": 0.0,
+        "quad": -0.0043493305089592135,
+        "importance": 0.010554744947540717
+      },
+      "bs_eyeLookInRight": {
+        "lin": 0.012571352549915416,
+        "quad": -0.0,
+        "importance": 0.012383978572599045
+      },
+      "bs_eyeLookOutLeft": {
+        "lin": 0.02270334628868239,
+        "quad": -0.0,
+        "importance": 0.02245985815424938
+      },
+      "bs_eyeLookOutRight": {
+        "lin": 0.027718920621521707,
+        "quad": -0.0,
+        "importance": 0.02453372560879891
+      },
+      "bs_eyeLookUpLeft": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeLookUpRight": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeSquintLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeSquintRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_eyeWideLeft": {
+        "lin": 0.0,
+        "quad": -0.015457041125477692,
+        "importance": 0.03517855702751856
+      },
+      "bs_eyeWideRight": {
+        "lin": 0.0,
+        "quad": -0.001119704862916715,
+        "importance": 0.0025240323827216355
+      },
+      "bs_jawForward": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_jawLeft": {
+        "lin": -0.0,
+        "quad": -0.005858541850348371,
+        "importance": 0.009939242903079796
+      },
+      "bs_jawOpen": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_jawRight": {
+        "lin": -0.029517515665816528,
+        "quad": -0.008233505584777732,
+        "importance": 0.029801549361877237
+      },
+      "bs_mouthClose": {
+        "lin": 0.005840320656944678,
+        "quad": -0.0,
+        "importance": 0.0024598709656236707
+      },
+      "bs_mouthDimpleLeft": {
+        "lin": -0.0007293304958731986,
+        "quad": -0.0,
+        "importance": 0.0005634260994494874
+      },
+      "bs_mouthDimpleRight": {
+        "lin": -0.0,
+        "quad": -0.004243071021213532,
+        "importance": 0.009071011331193037
+      },
+      "bs_mouthFrownLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthFrownRight": {
+        "lin": -0.0,
+        "quad": -0.024689627834524393,
+        "importance": 0.037880422430486824
+      },
+      "bs_mouthFunnel": {
+        "lin": 0.006951627062220629,
+        "quad": -0.0,
+        "importance": 0.006066350501936245
+      },
+      "bs_mouthLeft": {
+        "lin": 0.020501594630254135,
+        "quad": -0.007024042009732805,
+        "importance": 0.007256804114213297
+      },
+      "bs_mouthLowerDownLeft": {
+        "lin": -0.005096976535063745,
+        "quad": -0.0,
+        "importance": 0.004617191893605085
+      },
+      "bs_mouthLowerDownRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthPressLeft": {
+        "lin": -0.0,
+        "quad": -0.0008782559025926046,
+        "importance": 0.0019129475927482428
+      },
+      "bs_mouthPressRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthPucker": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthRight": {
+        "lin": 0.011688026718989275,
+        "quad": -0.0,
+        "importance": 0.00739950643530569
+      },
+      "bs_mouthRollLower": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthRollUpper": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthShrugLower": {
+        "lin": -0.03610303029769441,
+        "quad": -0.004608668227935507,
+        "importance": 0.03361386261195397
+      },
+      "bs_mouthShrugUpper": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthSmileLeft": {
+        "lin": 0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthSmileRight": {
+        "lin": 0.006309976193009036,
+        "quad": -0.0,
+        "importance": 0.006308090084388027
+      },
+      "bs_mouthStretchLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthStretchRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthUpperUpLeft": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_mouthUpperUpRight": {
+        "lin": -0.0,
+        "quad": -0.0,
+        "importance": 0.0
+      },
+      "bs_noseSneerLeft": {
+        "lin": -0.006391412968063566,
+        "quad": -0.0,
+        "importance": 0.005613345184671187
+      },
+      "bs_noseSneerRight": {
+        "lin": -5.217488888111377e-06,
+        "quad": -0.0006680383981625172,
+        "importance": 0.0015237778601747225
+      }
+    },
+    "group_importance": {
+      "eyes": 0.16040525992907395,
+      "brows": 0.02721210394373959,
+      "nose": 0.13844258716639682,
+      "mouth": 0.10119757145596724,
+      "jaw": 0.09815326727170236,
+      "proportions": 0.08251754553482879,
+      "depth": 0.10194196899801805,
+      "symmetry": 0.020453172447890775,
+      "shape": 0.1102578409556144,
+      "skin": 0.08289413986702511,
+      "colouring": 0.19246867984035793,
+      "hair": 0.054559480233776846,
+      "leanness": 0.058494631737718024,
+      "expression": 0.0972258826174235
     }
   },
   "all": {
-    "pearson": 0.6743066196356291,
-    "mae": 0.39172022562564207,
-    "rmse": 0.5011213596257206
+    "pearson": 0.8039471593549778,
+    "mae": 0.31379603212993457,
+    "rmse": 0.40360125357247706
   },
   "all_free": {
-    "pearson": 0.6986956390801959,
-    "mae": 0.3821905929613482,
-    "rmse": 0.48570785960908114
+    "pearson": 0.8197835299080833,
+    "mae": 0.2995127742273126,
+    "rmse": 0.3889849893553116
+  },
+  "ablation": {
+    "original_15": 0.6746213628740003,
+    "only": {
+      "eyes": 0.5934752183730307,
+      "brows": 0.5337966678012702,
+      "nose": 0.37981801022533856,
+      "mouth": 0.5393755818930068,
+      "jaw": 0.6387993278829536,
+      "proportions": 0.643487398579714,
+      "depth": 0.5733846494957052,
+      "symmetry": 0.2736819586308123,
+      "shape": 0.7045113013796487,
+      "skin": 0.3781513310185255,
+      "colouring": 0.5473654512996583,
+      "hair": 0.298019928897049,
+      "leanness": 0.3080823658029929,
+      "expression": 0.6005287596825235
+    },
+    "without": {
+      "eyes": 0.7974633086407458,
+      "brows": 0.8039796086939472,
+      "nose": 0.8052843891724413,
+      "mouth": 0.8035643272880837,
+      "jaw": 0.8035993886037289,
+      "proportions": 0.80351875077121,
+      "depth": 0.803735526467118,
+      "symmetry": 0.8043257345683519,
+      "shape": 0.8031198808089393,
+      "skin": 0.7969370628929835,
+      "colouring": 0.7848778214748643,
+      "hair": 0.8022111518295425,
+      "leanness": 0.8041624946304577,
+      "expression": 0.8015981651183436
+    }
   }
 }

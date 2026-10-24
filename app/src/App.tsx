@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { Engine, loadModels, type Models, type PersonSnapshot } from './engine'
-import { PersonCard, type Tone } from './ui/PersonCard'
+import { PersonCard } from './ui/PersonCard'
 
 const FEEDBACK_URL = import.meta.env.VITE_FEEDBACK_URL as string | undefined
 const CONSENT_KEY = 'mogscan-consent-v1'
+const PARAMS = new URLSearchParams(location.search)
 // ?nocam skips getUserMedia (photo-only mode, e.g. for testing without a webcam).
-const NO_CAM = new URLSearchParams(location.search).has('nocam')
+const NO_CAM = PARAMS.has('nocam')
+// ?study shows the Record button that exports the numeric session log for the user study.
+const STUDY = PARAMS.has('study')
 
 function readConsent() {
   try { return localStorage.getItem(CONSENT_KEY) === 'yes' } catch { return false }
@@ -20,11 +23,6 @@ export default function App() {
   const [photo, setPhoto] = useState<string | null>(null)
   const [people, setPeople] = useState<PersonSnapshot[]>([])
   const [fps, setFps] = useState(0)
-  const [tone, setTone] = useState<Tone>('kind')
-  const [mirror, setMirror] = useState(true)
-  const [showMesh, setShowMesh] = useState(false)
-  const [showGuides, setShowGuides] = useState(true)
-  const [battle, setBattle] = useState(false)
   const [recording, setRecording] = useState(false)
   const logRef = useRef<object[]>([])
   const recordingRef = useRef(false)
@@ -62,7 +60,7 @@ export default function App() {
   useEffect(() => {
     if (!models) return
     const engine = new Engine(models, canvasRef.current!,
-      () => (photo ? imgRef.current : videoRef.current), { mirror, showMesh, showGuides })
+      () => (photo ? imgRef.current : videoRef.current), { mirror: !photo })
     engineRef.current = engine
     engine.start()
     const id = setInterval(() => {
@@ -82,18 +80,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [models, photo])
 
-  useEffect(() => {
-    if (engineRef.current) engineRef.current.opts = { mirror: mirror && !photo, showMesh, showGuides }
-  }, [mirror, showMesh, showGuides, photo])
-
   const toggleSex = (p: PersonSnapshot) => engineRef.current?.sexOverride.set(p.id, p.sex === 'M' ? 'F' : 'M')
-
-  const snapshot = () => {
-    const a = document.createElement('a')
-    a.download = `mogscan-${Date.now()}.png`
-    a.href = canvasRef.current!.toDataURL('image/png')
-    a.click()
-  }
 
   const toggleRecording = () => {
     if (!recording) {
@@ -112,6 +99,11 @@ export default function App() {
     a.click()
   }
 
+  const useCamera = () => {
+    if (photo) URL.revokeObjectURL(photo)
+    setPhoto(null)
+  }
+
   const onPhoto = (f: File | undefined) => {
     if (!f) return
     if (photo) URL.revokeObjectURL(photo)
@@ -123,7 +115,7 @@ export default function App() {
       <div className="gate">
         <div className="gate-card">
           <h1>MogScan</h1>
-          <p className="lede">Real-time, multi-person facial aesthetics analysis.</p>
+          <p className="lede">Live facial aesthetics analysis from your camera or a photo.</p>
           <ul>
             <li>Everything runs <b>on this device</b>. No images are uploaded or stored.</li>
             <li>Scores are a model's estimate of how one panel of 60 raters judged faces. They are not a
@@ -139,25 +131,23 @@ export default function App() {
     )
   }
 
-  const rated = people.filter((p) => p.rating)
   return (
     <div className="app">
       <header className="top">
-        <div className="brand">MOG<span>SCAN</span></div>
+        <div className="brand">MogScan</div>
         <div className="controls">
-          <select value={deviceId} onChange={(e) => { setPhoto(null); setDeviceId(e.target.value) }} aria-label="Camera">
-            {devices.length === 0 && <option value="">Camera</option>}
-            {devices.map((d, i) => <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i + 1}`}</option>)}
-          </select>
-          <label className="file">Photo<input type="file" accept="image/*" onChange={(e) => onPhoto(e.target.files?.[0])} /></label>
-          <button className={tone === 'brutal' ? 'on' : ''} onClick={() => setTone(tone === 'kind' ? 'brutal' : 'kind')}>
-            {tone === 'kind' ? 'Kind' : 'Brutal'} mode</button>
-          <button className={battle ? 'on' : ''} onClick={() => setBattle(!battle)}>Mog battle</button>
-          <button className={showGuides ? 'on' : ''} onClick={() => setShowGuides(!showGuides)}>Guides</button>
-          <button className={showMesh ? 'on' : ''} onClick={() => setShowMesh(!showMesh)}>Mesh</button>
-          <button className={mirror ? 'on' : ''} onClick={() => setMirror(!mirror)}>Mirror</button>
-          <button onClick={snapshot}>Snapshot</button>
-          <button className={recording ? 'rec' : ''} onClick={toggleRecording}>{recording ? '■ Stop & save log' : '● Record'}</button>
+          {photo ? (
+            <button onClick={useCamera}>Live camera</button>
+          ) : (
+            <select value={deviceId} onChange={(e) => setDeviceId(e.target.value)} aria-label="Camera">
+              {devices.length === 0 && <option value="">Live camera</option>}
+              {devices.map((d, i) => <option key={d.deviceId} value={d.deviceId}>{d.label || `Camera ${i + 1}`}</option>)}
+            </select>
+          )}
+          <label className="file">Upload photo<input type="file" accept="image/*"
+            onChange={(e) => { onPhoto(e.target.files?.[0]); e.target.value = '' }} /></label>
+          {STUDY && <button className={recording ? 'rec' : ''} onClick={toggleRecording}>
+            {recording ? '■ Stop & save log' : '● Record'}</button>}
           {FEEDBACK_URL && <a className="btn" href={FEEDBACK_URL} target="_blank" rel="noreferrer">Feedback</a>}
         </div>
       </header>
@@ -168,21 +158,16 @@ export default function App() {
           <video ref={videoRef} playsInline muted hidden />
           {photo && <img ref={imgRef} src={photo} alt="" hidden />}
           {status && <div className="status">{status}</div>}
-          <div className="hud">{fps} fps · {people.length} face{people.length === 1 ? '' : 's'} · on-device</div>
+          <div className="hud" title={`${fps} fps`}>Processed on this device</div>
         </section>
 
         <aside className="panel">
-          {battle && rated.length >= 2 && (
-            <div className="battle">
-              <div className="battle-title">MOG BATTLE</div>
-              <ol>{rated.map((p) => <li key={p.id}><b>P{p.id}</b> {p.rating!.tier}<span>{p.rating!.psl.toFixed(2)}</span></li>)}</ol>
-              <div className="verdict">P{rated[0].id} mogs {rated.slice(1).map((p) => `P${p.id}`).join(', ')}
-                {' '}by {(rated[0].rating!.psl - rated[1].rating!.psl).toFixed(2)} PSL</div>
-            </div>
+          {people.length === 0 && !status && (
+            <div className="empty">{photo ? 'No face found in this photo.' : 'Look at the camera, or upload a photo.'}</div>
           )}
-          {people.length === 0 && !status && <div className="empty">Step into frame. Up to 6 people at once.</div>}
-          {people.map((p, i) => (
-            <PersonCard key={p.id} p={p} tone={tone} rank={p.rating ? i + 1 : 0} onToggleSex={() => toggleSex(p)} />
+          {people.map((p) => (
+            <PersonCard key={p.id} p={p} showId={people.length > 1} onToggleSex={() => toggleSex(p)}
+              onRescan={() => engineRef.current?.rescan(p.id)} />
           ))}
         </aside>
       </main>

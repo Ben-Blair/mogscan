@@ -1,7 +1,8 @@
 """Run MediaPipe FaceLandmarker over SCUT-FBP5500.
 
-Output: training/out/landmarks.npz with names, (N,478,3) normalised landmarks, image sizes
-and head pose (yaw, pitch). Metrics are computed afterwards by build_features.py.
+Output: training/out/landmarks.npz with names, (N,478,3) normalised landmarks, image sizes,
+head pose (yaw, pitch) and the 52 ARKit-style expression blendshapes. Metrics are computed
+afterwards by build_features.py.
 """
 import os
 from pathlib import Path
@@ -42,8 +43,10 @@ def main():
         running_mode=RunningMode.IMAGE,
         num_faces=1,
         output_facial_transformation_matrixes=True,
+        output_face_blendshapes=True,
     )
-    names, lms, sizes, poses = [], [], [], []
+    names, lms, sizes, poses, blends = [], [], [], [], []
+    blend_names = None
     with FaceLandmarker.create_from_options(opts) as lmk:
         for i, row in df.iterrows():
             rgb = np.asarray(Image.open(DATA / "Images" / row["name"]).convert("RGB"))
@@ -57,11 +60,14 @@ def main():
             lms.append(arr)
             sizes.append((img.width, img.height))
             poses.append((pose["yaw"], pose["pitch"]))
+            blend_names = [c.category_name for c in res.face_blendshapes[0]]
+            blends.append([c.score for c in res.face_blendshapes[0]])
             if i % 500 == 0:
                 print(f"{i}/{len(df)}")
     print(f"detected {len(names)}/{len(df)} faces")
     np.savez_compressed(OUT / "landmarks.npz", names=np.array(names), landmarks=np.stack(lms),
-                        sizes=np.array(sizes), poses=np.array(poses))
+                        sizes=np.array(sizes), poses=np.array(poses),
+                        blendshapes=np.array(blends, dtype=np.float32), blend_names=np.array(blend_names))
 
 
 if __name__ == "__main__":
