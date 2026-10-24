@@ -125,6 +125,17 @@ def main():
         for g in sorted(groups, key=lambda g: -ab["only"][g]):
             name = GROUP_LABELS[g].replace("&", "\\&")
             f.write(f"{name} & {len(groups[g])} & {ab['only'][g]:.3f} & {ab['without'][g] - full:+.3f} \\\\\n")
+    glow = json.load(open(OUT / "results_glowup.json"))
+    glow_names = {"skincare": "Skincare (smoother, even skin)", "redness": "Reduce redness", "undereye": "Brighten under-eyes",
+                  "glow": "Self-tanner / bronzer", "jaw": "Jawline contour", "cheeks": "Cheekbone contour",
+                  "brows": "Fill in brows", "lashes": "Define lash line", "lips": "Lip colour", "facialhair": "Stubble",
+                  "eyes": "Brighter sclera", "combined": "All of the above"}
+    cell = lambda a, s: (f"{glow[a][s]['success'] * 100:.0f}\\% & {glow[a][s]['meanPsl']:+.3f}" if s in glow[a] else "-- & --")
+    with open(GEN / "glowup_table.tex", "w") as f:
+        for a in sorted((a for a in glow if a != "combined"), key=lambda a: -glow[a]["M"]["meanPsl"]) + ["combined"]:
+            f.write(f"{glow_names[a]} & {cell(a, 'M')} & {cell(a, 'F')} \\\\\n")
+    with open(GEN / "numbers.tex", "a") as f:
+        f.write(f"\\newcommand{{\\glowN}}{{{glow['brows']['M']['n'] + glow['brows']['F']['n']}}}\n")
     with open(GEN / "bias_table.tex", "w") as f:
         for b in bias:
             f.write(f"{b['group']} & {b['n']} & {b['pearson']:.3f} & {b['mae']:.3f} & {b['signed_bias']:+.3f} \\\\\n")

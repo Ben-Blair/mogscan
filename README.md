@@ -36,7 +36,8 @@ npm run build      # static build in app/dist (deployable anywhere, e.g. Vercel)
 ```
 The app has two inputs: the live camera (pick a USB camera from the dropdown) or **Upload photo**.
 There are no battles, rankings or leaderboards; each face is scanned for ~2 s, then the score locks.
-The card shows a glow-up plan (non-surgical actions, each with a predicted score) and your potential score.
+The card shows a glow-up plan: non-surgical actions chosen from your measurements, each with a predicted score
+that was measured by simulating the action on 300 held-out test photos through the full pipeline.
 Add `?nocam` to the URL to skip the webcam, and `?study` to show the **Record** button used for the user study.
 Set `VITE_FEEDBACK_URL` (for example in `app/.env.local`) to show a Feedback button that links to your Google Form.
 
@@ -52,6 +53,7 @@ mkdir -p data && cd data && ../.venv/bin/gdown 1w0TorBfTIqbquQVd6k3h_77ypnrvfGwf
 .venv/bin/python fuse_calibrate.py      # fusion weights, PSL calibration, headline results
 .venv/bin/python export_onnx.py         # app/public/models/mognet.onnx
 .venv/bin/python eval_bias.py           # subgroup accuracy and bias
+.venv/bin/python simulate_glowup.py      # simulate glow-up actions on test photos → app/public/models/glowup.json
 .venv/bin/python make_figures.py        # figures + LaTeX number macros for the write-up
 .venv/bin/python make_parity_fixture.py # fixtures for the TS parity test
 ```

@@ -140,12 +140,6 @@ export function rate(m: Features, cnn: number | null, sex: Sex, geo: GeoModel, f
     features: g.features, pillars: pillars(g.features), cnnPsl, geoPsl }
 }
 
-/** The rating after the feature model's score changes by `geoDelta` (1–5 rating units), expressed on the
- * PSL scale the same way per-feature effects are (delta / rating SD). Used for glow-up predictions. */
-export function finalizeWith(r: Rating, geoDelta: number, fusion: FusionModel) {
-  return { psl: Math.max(1, Math.min(8, r.psl + geoDelta / fusion.scoreStd)) }
-}
-
 /** Top strengths and weaknesses (largest positive / negative contributions). */
 export function strengthsWeaknesses(features: FeatureResult[], n = 3) {
   // Expression and abstract shape components are not things you can point at, so they are not listed here.

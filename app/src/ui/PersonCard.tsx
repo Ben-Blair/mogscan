@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { PersonSnapshot } from '../engine'
 import { featureInfo, GROUP_LABELS } from '../scoring/features'
 import { strengthsWeaknesses, tierName, type FeatureResult } from '../scoring/scoring'
-import type { GlowUpPlan } from '../scoring/glowup'
+import type { GlowUpPlan, PlanItem } from '../scoring/glowup'
 import type { Rating } from '../scoring/scoring'
 import { tierColor } from './draw'
 
@@ -96,33 +96,72 @@ function AllFeatures({ features }: { features: FeatureResult[] }) {
   )
 }
 
-function Plan({ plan }: { plan: GlowUpPlan }) {
-  if (!plan.items.length) return <p className="hint plan-empty">Nothing in the plan would raise your score noticeably.</p>
+const STRUCTURAL = new Set(['eyes', 'brows', 'nose', 'mouth', 'jaw', 'proportions', 'depth', 'symmetry', 'shape'])
+
+function Reasons({ it }: { it: PlanItem }) {
+  if (!it.reasons.length) return null
+  return (
+    <ul className="plan-why">
+      {it.reasons.map((rs) => (
+        <li key={rs.name}><span>{rs.label}</span><span>you {rs.you} · top-rated {rs.target}</span></li>
+      ))}
+    </ul>
+  )
+}
+
+function Plan({ plan, features }: { plan: GlowUpPlan; features: FeatureResult[] }) {
+  // Weaknesses that are bone structure: no non-surgical action changes these, so say so.
+  const structural = strengthsWeaknesses(features).weaknesses.filter((f) => STRUCTURAL.has(f.group))
   return (
     <div className="plan">
-      <ol>
-        {plan.items.map((it) => (
-          <li key={it.id}>
-            <div className="plan-head">
-              <span className="plan-title">{it.title}</span>
-              <span className="plan-gain">+{it.gain.toFixed(2)}</span>
-            </div>
-            {it.reasons.length > 0 && (
-              <ul className="plan-why">
-                {it.reasons.map((rs) => (
-                  <li key={rs.name}><span>{rs.label}</span><span>you {rs.you} · top-rated {rs.target}</span></li>
-                ))}
-              </ul>
-            )}
-            {it.tip && <p className="plan-tip">{it.tip}</p>}
-            <p className="plan-how">{it.how}</p>
-            <span className="plan-pred">Predicted {plan.current.toFixed(2)} → {it.predicted.toFixed(2)}</span>
-          </li>
-        ))}
-      </ol>
+      {plan.items.length > 0 ? (
+        <ol>
+          {plan.items.map((it) => (
+            <li key={it.id}>
+              <div className="plan-head">
+                <span className="plan-title">{it.title}</span>
+                <span className="plan-gain">+{it.gain!.toFixed(2)}</span>
+              </div>
+              <Reasons it={it} />
+              {it.tip && <p className="plan-tip">{it.tip}</p>}
+              <p className="plan-how">{it.how}</p>
+              <span className="plan-pred">
+                Predicted {plan.current.toFixed(2)} → {it.predicted!.toFixed(2)} · raised the score for
+                {' '}{Math.round(it.success! * 100)}% of test faces
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : <p className="hint plan-empty">None of the tested actions would raise your score noticeably.</p>}
+
+      {plan.untested.length > 0 && (
+        <section className="plan-extra">
+          <h4>Also worth trying</h4>
+          <p className="plan-sub">Based on your measurements, but these can't be simulated on a photo, so there's no prediction.</p>
+          <ul>
+            {plan.untested.map((it) => (
+              <li key={it.id}>
+                <span className="plan-title">{it.title}</span>
+                <Reasons it={it} />
+                {it.tip && <p className="plan-tip">{it.tip}</p>}
+                <p className="plan-how">{it.how}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {structural.length > 0 && (
+        <p className="plan-note">
+          Not covered: {structural.map((f) => featureInfo(f.name).label.toLowerCase()).join(', ')}. These come from bone
+          structure, and the plan doesn't suggest surgery.
+        </p>
+      )}
       <p className="plan-note">
-        Estimates from the scoring model, assuming each change gets you halfway to the average of top-rated faces.
-        Rescan after a change to see your real result. Nothing here involves surgery or UV tanning.
+        How predictions work: each action was simulated on 300 held-out photos and the full score was measured
+        before and after. Predictions use those results, adjusted for your measurements. Rescan in the same light
+        after a change to see your real result.
+        {plan.failed.length > 0 && <> Tested but didn't raise the score: {plan.failed.join(', ').toLowerCase()}.</>}
       </p>
     </div>
   )
@@ -193,7 +232,7 @@ export function PersonCard({ p, showId, onToggleSex, onRescan }: {
           <span className="potential-cta">{view === 'plan' ? 'Hide plan' : 'See glow-up plan'}</span>
         </button>
       )}
-      {view === 'plan' && p.plan && <Plan plan={p.plan} />}
+      {view === 'plan' && p.plan && <Plan plan={p.plan} features={r.features} />}
 
       <nav className="card-tabs">
         <button className={view === 'measurements' ? 'active' : ''}

@@ -2,7 +2,7 @@ import type { FaceLandmarker } from '@mediapipe/tasks-vision'
 import { loadMogNet, type MogNet } from './model/mognet'
 import { APPEAR_SIZE, appearanceCrop, computeAppearance } from './scoring/appearance'
 import { analyzeFace, cropBox, type ShapeModel, type Vec3 } from './scoring/metrics'
-import { glowUpPlan, type GlowUpPlan } from './scoring/glowup'
+import { glowUpPlan, type GlowUpModel, type GlowUpPlan } from './scoring/glowup'
 import { rate, type FusionModel, type GeoModel, type Rating, type Sex } from './scoring/scoring'
 import { drawFrame, type DrawOptions } from './ui/draw'
 import { createLandmarker } from './vision/landmarker'
@@ -26,6 +26,7 @@ export interface PersonSnapshot {
 
 export interface Models {
   landmarker: FaceLandmarker; mognet: MogNet; geo: GeoModel; fusion: FusionModel; template: Vec3[]; shape: ShapeModel
+  glowup: GlowUpModel
 }
 
 export async function loadModels(onStatus: (s: string) => void): Promise<Models> {
@@ -33,9 +34,10 @@ export async function loadModels(onStatus: (s: string) => void): Promise<Models>
   onStatus('Loading face landmarker…')
   const landmarker = await createLandmarker()
   onStatus('Loading MogNet…')
-  const [mognet, geo, fusion, template, shape] = await Promise.all([
-    loadMogNet(), json('geometric.json'), json('fusion.json'), json('face_template.json'), json('shape.json')])
-  return { landmarker, mognet, geo, fusion, template, shape }
+  const [mognet, geo, fusion, template, shape, glowup] = await Promise.all([
+    loadMogNet(), json('geometric.json'), json('fusion.json'), json('face_template.json'), json('shape.json'),
+    json('glowup.json')])
+  return { landmarker, mognet, geo, fusion, template, shape, glowup }
 }
 
 /** Owns the per-frame loop: landmarks -> tracking -> metrics -> throttled CNN -> rating -> draw. */
@@ -156,7 +158,7 @@ export class Engine {
     return this.tracker.tracks.filter((t) => t.lastSeen === now).map((t) => {
       const { sex, auto } = this.sexFor(t)
       const rating = this.ratings.get(t.id) ?? null
-      const plan = rating ? glowUpPlan(rating, sex, this.models.geo, this.models.fusion) : null
+      const plan = rating ? glowUpPlan(rating, sex, this.models.geo, this.models.fusion, this.models.glowup) : null
       return { id: t.id, frontal: t.frontal, progress: scanProgress(t), yaw: t.yaw, sex, sexAuto: auto, rating, plan }
     }).sort((a, b) => a.id - b.id)
   }

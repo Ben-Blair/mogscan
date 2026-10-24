@@ -1,13 +1,30 @@
-// Glow-up plan: non-surgical actions mapped to the features they change, with a predicted score.
-// The prediction moves each action's features part of the way toward the average of top-rated faces
-// and re-runs the feature model. It is an estimate of what the model would say, not a guarantee.
-import { finalizeWith, geometric, type FusionModel, type GeoModel, type Rating, type Sex } from './scoring'
+// Glow-up plan: non-surgical actions, chosen and predicted from the person's own measurements.
+//
+// Predictions are *measured*, not guessed: training/simulate_glowup.py applies each action as an edit to 300
+// held-out test photos and re-runs the whole app pipeline (landmarks, features, CNN, fusion). An action is
+// offered only if it raised the real score for most of those faces. For a given person the prediction is
+// the measured CNN effect (adjusted for their own main measurement) plus the feature model's response to
+// the measured feature change, combined with the app's fusion weights, so it is on the score they see.
+import { geometric, type FusionModel, type GeoModel, type Rating, type Sex } from './scoring'
 import { featureInfo } from './features'
 import type { Features } from './metrics'
 
-/** How far toward the top-rated average each action is assumed to move a feature. */
-export const PROGRESS = 0.5
+/** Actions are hidden when the predicted gain for this person is smaller than this (PSL). */
+export const MIN_GAIN = 0.02
 
+/** Measured effect of one action for one sex (from glowup.json). */
+export interface ActionCalibration {
+  n: number; meanPsl: number; success: number
+  /** CNN effect = cnnA + cnnB * z(main feature). */
+  cnnA: number; cnnB: number
+  featureDelta: Record<string, number>
+}
+export interface GlowUpModel {
+  minSuccess: number
+  actions: Record<string, Partial<Record<Sex, ActionCalibration>>>
+  /** Measured combined effect / sum of single effects, per sex. */
+  additivity: Record<Sex, number>
+}
 interface Action {
   id: string
   title: string
@@ -20,6 +37,8 @@ interface Action {
   titleFor?: (more: boolean) => string
   /** Extra, specific advice keyed by the feature that drives this person's gain the most. */
   tips?: Record<string, string>
+  /** For actions that can't be simulated: which way the action moves each feature (+1 up, -1 down). */
+  dirs?: Record<string, 1 | -1>
 }
 
 const ACTIONS: Action[] = [
@@ -46,6 +65,7 @@ const ACTIONS: Action[] = [
   { id: 'lean', title: 'Lose facial puffiness',
     how: 'If you have fat to lose, a modest calorie deficit and strength training; less salt and alcohol, more water and sleep. This slims the lower face and reveals the jaw.',
     features: ['lower_face_fullness', 'cheek_hollow', 'jaw_definition'],
+    dirs: { lower_face_fullness: -1, cheek_hollow: -1, jaw_definition: 1 },
     tips: { lower_face_fullness: 'Your lower face reads fuller than top-rated faces, so puffiness, not bone, is the gap: cut salt and alcohol first, since water retention shows within days.',
       jaw_definition: 'Your jaw shadow is soft: losing even a little facial fat sharpens it more than anything else.',
       cheek_hollow: 'Your cheeks read full: leaning out is what creates the hollow under the cheekbone.' } },
@@ -71,6 +91,7 @@ const ACTIONS: Action[] = [
   { id: 'hair', title: 'Get a haircut with texture',
     how: 'Ask for volume and texture on top with tidy sides; a matte styling product keeps it defined.',
     features: ['hair_texture', 'hair_darkness'],
+    dirs: { hair_texture: 1, hair_darkness: 1 },
     tips: { hair_texture: 'Your hair reads flat in the scan: volume and texture on top is what to ask for.',
       hair_darkness: 'Your hair reads light against your face: a slightly darker, richer shade adds contrast.' } },
   { id: 'eyes', title: 'Brighter, clearer eyes',
@@ -88,68 +109,87 @@ export interface PlanItem {
   id: string
   title: string
   how: string
-  /** Personal tip for the measurement that drives the gain most (if the action has one). */
+  /** Personal tip for the measurement that matters most for this person (if the action has one). */
   tip: string | null
-  /** This person's measurements that the action improves, biggest effect first. */
+  /** This person's measurements behind the action, biggest gap first. */
   reasons: PlanReason[]
-  /** Predicted PSL after this action alone, and the gain over the current score. */
-  predicted: number
-  gain: number
+  /** Predicted PSL after this action alone, and the gain over the current score. Null when untested. */
+  predicted: number | null
+  gain: number | null
+  /** Share of test faces whose real score went up when this action was simulated. */
+  success: number | null
 }
 
-export interface GlowUpPlan { items: PlanItem[]; potential: number; current: number }
+export interface GlowUpPlan {
+  /** Tested actions that raise the score for this person, biggest gain first. */
+  items: PlanItem[]
+  /** Worth doing but impossible to test on a photo (no prediction). */
+  untested: PlanItem[]
+  /** Titles of actions that were tested and did *not* raise the score. */
+  failed: string[]
+  potential: number
+  current: number
+}
+
+const UNTESTED = new Set(['lean', 'hair', 'expression'])
 
 function expand(names: string[], all: string[]) {
   return names.flatMap((n) => (n === 'bs_*' ? all.filter((a) => a.startsWith('bs_')) : [n]))
 }
 
-/** Rank actions by the score gain the model predicts for this face. */
-export function glowUpPlan(r: Rating, sex: Sex, geo: GeoModel, fusion: FusionModel): GlowUpPlan {
-  const values: Features = {}
-  const target: Features = {}
-  for (const f of r.features) if (f.measured) { values[f.name] = f.value; target[f.name] = f.target }
+export function glowUpPlan(r: Rating, sex: Sex, geo: GeoModel, fusion: FusionModel, cal: GlowUpModel): GlowUpPlan {
+  const values: Features = {}, target: Features = {}, z: Features = {}, effect: Features = {}
+  for (const f of r.features) {
+    if (!f.measured) continue
+    values[f.name] = f.value; target[f.name] = f.target; z[f.name] = f.z; effect[f.name] = f.psl
+  }
   const all = Object.keys(values)
   const base = geometric(values, sex, geo, fusion.scoreStd).score
 
-  const improve = (names: string[], into: Features) => {
-    for (const n of names) if (n in values) into[n] = values[n] + PROGRESS * (target[n] - values[n])
-  }
-  const predict = (changed: Features) => {
-    const g = geometric(changed, sex, geo, fusion.scoreStd).score
-    return finalizeWith(r, g - base, fusion).psl
-  }
+  /** Measurements behind an action: ones currently costing this person points *and* that the action moves
+   * toward the top-rated value (dir +1 = action raises it, -1 = lowers it, 0 = either), worst first. */
+  const reasonsFor = (names: string[], dir: (n: string) => number): PlanReason[] => names
+    .filter((n) => n in values && effect[n] < -0.005 && (dir(n) === 0 || Math.sign(target[n] - values[n]) === dir(n)))
+    .sort((a, b) => effect[a] - effect[b]).slice(0, 3)
+    .map((n) => {
+      const info = featureInfo(n)
+      return { name: n, label: info.label, you: info.fmt(values[n]), target: info.fmt(target[n]) }
+    })
 
-  const items: PlanItem[] = []
-  const combined: Features = { ...values }
+  const items: PlanItem[] = [], untested: PlanItem[] = [], failed: string[] = []
   for (const a of ACTIONS) {
     if (a.sex && a.sex !== sex) continue
     const names = expand(a.features, all).filter((n) => n in values)
-    if (!names.length) continue
-    const changed = { ...values }
-    improve(names, changed)
-    const predicted = predict(changed)
-    const gain = predicted - r.psl
-    if (gain < 0.03) continue
-    improve(names, combined)
-    // Which of this person's measurements drive the gain: improve each one alone.
-    const drivers = names.map((n) => {
-      const one = { ...values }
-      improve([n], one)
-      return { n, g: predict(one) - r.psl }
-    }).filter((d) => d.g > 0.005).sort((x, y) => y.g - x.g)
-    const top = drivers[0]?.n ?? names[0]
-    const more = target[top] > values[top]
-    items.push({
+    const c = UNTESTED.has(a.id) ? undefined : cal.actions[a.id]?.[sex]
+    const dir = (n: string) => (c ? Math.sign(c.featureDelta[n] ?? 0) : (a.dirs?.[n] ?? 0))
+    const reasons = reasonsFor(names, dir)
+    const top = reasons[0]?.name
+    const more = top !== undefined && target[top] > values[top]
+    const item = {
       id: a.id, title: a.titleFor ? a.titleFor(more) : a.title,
       how: typeof a.how === 'function' ? a.how(more) : a.how,
-      tip: a.tips?.[top] ?? null,
-      reasons: drivers.slice(0, 3).map(({ n }) => {
-        const info = featureInfo(n)
-        return { name: n, label: info.label, you: info.fmt(values[n]), target: info.fmt(target[n]) }
-      }),
-      predicted, gain,
-    })
+      // A personal tip only when it is backed by one of this person's measurements.
+      tip: top ? a.tips?.[top] ?? null : null, reasons,
+    }
+    if (UNTESTED.has(a.id)) {
+      // No photo edit can simulate these, so no prediction; offer them only when the person's own
+      // measurements say they are a weak spot.
+      if (reasons.length) untested.push({ ...item, predicted: null, gain: null, success: null })
+      continue
+    }
+    if (!c) continue
+    if (c.success < cal.minSuccess || c.meanPsl <= 0) { failed.push(a.title); continue }
+    const changed = { ...values }
+    for (const [n, d] of Object.entries(c.featureDelta)) if (n in changed) changed[n] += d
+    const geoDelta = geometric(changed, sex, geo, fusion.scoreStd).score - base
+    const zMain = Math.max(-2.5, Math.min(2.5, z[names[0]] ?? 0))
+    const cnnDelta = c.cnnA + c.cnnB * zMain
+    const gain = (fusion.wCnn * cnnDelta + fusion.wGeo * geoDelta) / fusion.scoreStd
+    if (gain < MIN_GAIN) continue
+    items.push({ ...item, predicted: Math.min(8, r.psl + gain), gain, success: c.success })
   }
-  items.sort((x, y) => y.gain - x.gain)
-  return { items, potential: Math.max(r.psl, predict(combined)), current: r.psl }
+  items.sort((x, y) => (y.gain ?? 0) - (x.gain ?? 0))
+  // Doing several at once was measured to add up to `additivity` x the sum of single effects; never inflate.
+  const total = items.reduce((t, it) => t + (it.gain ?? 0), 0) * Math.min(1, cal.additivity[sex] ?? 1)
+  return { items, untested, failed, potential: Math.min(8, r.psl + total), current: r.psl }
 }

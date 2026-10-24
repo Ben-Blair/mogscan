@@ -420,16 +420,40 @@ clicking the sex badge on their card.
 
 \subsection{Glow-up plan}
 \label{sec:glowup}
-Fourteen non-surgical actions are each mapped to the features they plausibly change, for example
-contouring the jawline $\rightarrow$ jaw definition, a skincare routine $\rightarrow$ skin texture and
-evenness, brow pencil $\rightarrow$ brow darkness and thickness, and a calorie deficit $\rightarrow$ lower-face
-fullness, cheek hollowness and jaw definition. For each action we move those features halfway from the
-person's values toward the average of top-rated faces of the same sex, re-run the feature model, and report
-the change in PSL on the same scale as the per-feature effects (change in rating / $\sigma$). Actions that
-gain less than 0.03 PSL are hidden, and the rest are ranked by gain. Applying all of them at once gives the
-``potential'' score. This is a counterfactual \emph{of the model}, not a causal claim about the person; the
-app says so and invites a rescan after a real change. By design the plan never suggests surgery, injectables,
-or UV tanning; self-tanner or bronzer stands in for a tan.
+The plan suggests non-surgical actions and predicts the score after each one. A prediction is only useful if
+doing the action really moves the score the app shows, so we \emph{measured} it. For \glowN{} held-out test faces
+(150 per sex) we simulated each cosmetic action as an edit of the photo (smoother and more even skin, a contour
+shadow under the jaw, darker and fuller brows, a defined lash line, \dots), ran the edited photo through the
+complete app pipeline (MediaPipe landmarks and blendshapes, all features, the CNN, fusion), and compared the PSL
+with the unedited photo (Table~\ref{tab:glowup}).
+
+\begin{table}[t]
+\caption{Effect of simulated actions on the full MogScan score for \glowN{} held-out test faces: share of faces
+whose score rose, and mean change in PSL.}
+\label{tab:glowup}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & \multicolumn{2}{c}{Male faces} & \multicolumn{2}{c}{Female faces} \\
+Action & Raised & $\Delta$PSL & Raised & $\Delta$PSL \\
+\midrule
+\csname @@input\endcsname generated/glowup_table.tex
+\bottomrule
+\end{tabular}
+\end{table}
+
+Fuller, darker brows, smoother skin and a defined lash line raise the score for most faces. Several popular
+suggestions do not: cheekbone contour, lip colour, under-eye brightening and stubble \emph{lowered} the average
+score. The app therefore offers an action only if it raised the score for at least 60\% of test faces of that sex,
+and lists the rest as ``tested but didn't raise the score''. For one person the predicted gain is
+$(w_{\text{cnn}}\,\Delta_{\text{cnn}} + w_{\text{geo}}\,\Delta_{\text{geo}})/\sigma$, where $\Delta_{\text{cnn}}$ is the
+measured CNN effect adjusted linearly for the person's own value of the action's main measurement, and
+$\Delta_{\text{geo}}$ is the feature model's response when the measured average feature change is applied to the
+person's own values. Each suggestion also lists the person's measurements that the action moves toward the
+top-rated average, and a tip specific to the worst of them. Fat loss, haircuts and expression cannot be
+simulated on a photo, so they appear separately, without a prediction, and only when the person's measurements
+point to them. Structural weaknesses (for example nose width) are named as not covered, because the plan never
+suggests surgery, injectables or UV tanning.
 
 \subsection{Interface and privacy}
 The app is built with React and TypeScript on Vite. The toolbar has only two inputs: a camera picker for the

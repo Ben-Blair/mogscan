@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { OneEuro } from '../vision/oneEuro'
 import { appearanceCrop, computeAppearance } from './appearance'
-import { glowUpPlan } from './glowup'
+import { glowUpPlan, type GlowUpModel } from './glowup'
 import { analyzeFace, cropBox, type ShapeModel, type Vec3 } from './metrics'
 import { rate, type FusionModel, type GeoModel } from './scoring'
 import faces from './__fixtures__/parity.json'
@@ -10,6 +10,7 @@ import faces from './__fixtures__/parity.json'
 const model = (f: string) => JSON.parse(readFileSync(new URL(`../../public/models/${f}`, import.meta.url), 'utf8'))
 const geo = model('geometric.json') as GeoModel
 const fusion = model('fusion.json') as FusionModel
+const cal = model('glowup.json') as GlowUpModel
 
 describe('glow-up plan', () => {
   for (const face of faces.slice(0, 3)) {
@@ -20,15 +21,26 @@ describe('glow-up plan', () => {
       const app = computeAppearance({ data: new Uint8ClampedArray(Buffer.from(face.crop, 'base64')), size: face.cropSize }, crop.pts)
       const sex = face.name[1] === 'M' ? 'M' : 'F'
       const r = rate({ ...metrics, ...app }, 3, sex, geo, fusion)
-      const plan = glowUpPlan(r, sex, geo, fusion)
+      const plan = glowUpPlan(r, sex, geo, fusion, cal)
       expect(plan.potential).toBeGreaterThanOrEqual(r.psl)
       expect(plan.potential).toBeLessThanOrEqual(8)
       for (const it of plan.items) {
-        expect(it.gain).toBeGreaterThan(0)
-        expect(it.reasons.length).toBeGreaterThan(0)
-        expect(it.predicted).toBeLessThanOrEqual(plan.potential + 1e-9)
+        // Only actions that raised the real score on most simulated test photos are offered.
+        expect(it.success).toBeGreaterThanOrEqual(cal.minSuccess)
+        expect(cal.actions[it.id]![sex]!.meanPsl).toBeGreaterThan(0)
+        expect(it.gain!).toBeGreaterThan(0)
+        expect(it.predicted!).toBeLessThanOrEqual(plan.potential + 1e-9)
         expect(it.how.toLowerCase()).not.toMatch(/surgery|filler|botox|tanning bed/)
       }
+      for (const it of plan.untested) expect(it.predicted).toBeNull()
+      // A measurement is only given as a reason if the action moves it toward the top-rated value.
+      for (const it of plan.items) for (const rs of it.reasons) {
+        const f = r.features.find((x) => x.name === rs.name)!
+        expect(Math.sign(f.target - f.value)).toBe(Math.sign(cal.actions[it.id]![sex]!.featureDelta[rs.name]))
+      }
+      for (const it of [...plan.items, ...plan.untested]) if (it.tip) expect(it.reasons.length).toBeGreaterThan(0)
+      const titles = plan.items.map((i) => i.title)
+      for (const f of plan.failed) expect(titles).not.toContain(f)
       if (sex === 'F') expect(plan.items.find((i) => i.id === 'facialhair')).toBeUndefined()
     })
   }
